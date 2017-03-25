@@ -1,0 +1,15 @@
+language: rust
+rust:
+  - 1.13.0
+
+os:
+  - linux
+
+branches:
+  only:
+    - master
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always
