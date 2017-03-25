@@ -4,6 +4,8 @@ use slog::{Logger, LevelFilter, Level, DrainExt};
 use yaml_rust::{YamlLoader};
 use std::io::prelude::*;
 use std::fs::File;
+use yaml_rust::Yaml;
+use std::collections::BTreeMap;
 
 #[macro_use]
 extern crate slog;
@@ -32,15 +34,37 @@ fn main() {
     }
   };
 
-  let yaml_config = match YamlLoader::load_from_str(&config) {
+  let yaml_documents = match YamlLoader::load_from_str(&config) {
     Ok(yaml) => yaml,
     Err(e) => {
       error!(log, "Failed to parse config file."; "error" => format!("{:?}", e));
       panic!(2)
     }
   };
+  let yaml_config = &yaml_documents[0];
+  let dot_files: &Yaml = &yaml_config["files"];
+  if dot_files.is_badvalue() {
+    warn!(log, "Empty files list");
+  }
 
   info!(log, "Parsed config file. Liftoff!");
+  process_dot_files(&log, dot_files);
+}
+
+fn process_dot_files(log: &Logger, dot_files: &Yaml) {
+  info!(log, "Processing dotfiles");
+  let maybe_entries: Option<BTreeMap<Yaml, Yaml>> = dot_files.clone().into_hash();
+  if let Some(entries) = maybe_entries {
+    for (key, value) in entries {
+      match (key.as_str(), value.as_str()) {
+        (Some(target), Some(source)) =>
+          info!(log, "Process entry"; "target" => target, "source" => source),
+        _ => {}
+      }
+    }
+  } else {
+    warn!(log, "Found no entries to process");
+  }
 }
 
 fn load_config_file(file: &str) -> Result<String, std::io::Error> {

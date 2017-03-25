@@ -1,4 +1,4 @@
-- link:
+files:
     ~/.tmux/plugins/tpm: tpm
     ~/.tmux.conf: tmux.conf
     ~/.vimrc: vimrc
