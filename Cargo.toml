@@ -7,3 +7,4 @@ authors = ["Patrick Haun <bomgar85@googlemail.com>"]
 clap = "2.22.1"
 slog = "1"
 slog-term = "1"
+yaml-rust = "0.3.5"
