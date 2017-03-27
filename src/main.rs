@@ -12,10 +12,18 @@ extern crate slog;
 extern crate slog_term;
 extern crate yaml_rust;
 
+
+#[derive(Debug)]
+enum DotFileType {
+  LINK,
+  COPY
+}
+
 #[derive(Debug)]
 struct DotFile {
   source: String,
-  target: String
+  target: String,
+  dot_file_type: DotFileType
 }
 
 fn main() {
@@ -63,7 +71,7 @@ fn process_dot_files(log: &Logger, dot_files: &Yaml) {
     for (key, value) in entries {
       match (key, value) {
         (Yaml::String(target), Yaml::String(source)) =>
-          process_dot_file(log, DotFile{ source: source.to_string(), target: target.to_string() }),
+          process_dot_file(log, DotFile{ source: source.to_string(), target: target.to_string() , dot_file_type: DotFileType::LINK }),
         (Yaml::String(target), Yaml::Hash(settings)) =>
           process_dot_file(log, dot_file_from_settings(target, &settings)),
         _ => {}
@@ -75,11 +83,11 @@ fn process_dot_files(log: &Logger, dot_files: &Yaml) {
 }
 
 fn dot_file_from_settings(target: String, settings: &yaml_rust::yaml::Hash) -> DotFile {
-  DotFile{ source: "<todo>".to_string(), target: target.to_string() }
+  DotFile{ source: "<todo>".to_string(), target: target.to_string(), dot_file_type: DotFileType::LINK }
 }
 
 fn process_dot_file(log: &Logger, dot_file: DotFile) {
-  info!(log, "Process entry"; "target" => dot_file.target, "source" => dot_file.source);
+  info!(log, "Process entry"; "target" => dot_file.target, "source" => dot_file.source, "type" => format!("{:?}", dot_file.dot_file_type));
 }
 
 fn load_config_file(file: &str) -> Result<String, std::io::Error> {
