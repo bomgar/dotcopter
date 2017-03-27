@@ -59,12 +59,13 @@ fn main() {
 
 fn process_dot_files(log: &Logger, dot_files: &Yaml) {
   info!(log, "Processing dotfiles");
-  let maybe_entries: Option<BTreeMap<Yaml, Yaml>> = dot_files.clone().into_hash();
-  if let Some(entries) = maybe_entries {
+  if let Yaml::Hash(entries) = dot_files.clone() {
     for (key, value) in entries {
-      match (key.as_str(), value.as_str()) {
-        (Some(target), Some(source)) =>
+      match (key, value) {
+        (Yaml::String(target), Yaml::String(source)) =>
           process_dot_file(log, DotFile{ source: source.to_string(), target: target.to_string() }),
+        (Yaml::String(target), Yaml::Hash(settings)) =>
+         {},
         _ => {}
       }
     }

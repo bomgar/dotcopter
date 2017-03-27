@@ -1,29 +1,8 @@
 files:
     ~/.tmux/plugins/tpm: tpm
-    ~/.tmux.conf: tmux.conf
-    ~/.vimrc: vimrc
-    ~/.ideavimrc: ideavimrc
-    ~/.emacs.d: emacs.d
-    ~/.config/nvim/init.vim: vimrc
-    ~/.zshrc: zsh/zshrc
-    ~/.zshrc.local: zsh/zshrc.local
-    ~/.gitconfig: gitconfig
-    ~/.i3/config: i3/config
-    ~/.i3/lock.sh: i3/lock.sh
-    ~/.i3/wallpaper.png: i3/wallpaper.png
-    ~/.i3/i3blocks.conf: i3/i3blocks.conf
-    ~/.i3/i3status.conf: i3/i3status.conf
-    ~/.xsessionrc: xsessionrc
-    ~/.xsession: xsession
-    ~/bin/toggle_touchpad.sh: bin/toggle_touchpad.sh
-    ~/bin/i3blockKeyLayout: i3blocks-contrib/key_layout/key_layout
-    ~/bin/radar-base.sh: git-radar/radar-base.sh
-    ~/bin/prompt.zsh: git-radar/prompt.zsh
-    ~/bin/git-radar: git-radar/git-radar
-    ~/bin/svnaddallthethings.sh: bin/svnaddallthethings.sh
-    ~/bin/svnvimdiff.sh: bin/svnvimdiff.sh
-    ~/.vimperatorrc: vimperatorrc
-    ~/.config/nvim/autoload/plug.vim: vim-plug/plug.vim
-    ~/.vim/autoload/plug.vim: vim-plug/plug.vim
-    ~/.sbt/0.13/plugins/plugins.sbt: sbt/0.13/plugins/plugins.sbt
-    ~/.sbt/0.13/global.sbt: sbt/0.13/global.sbt
+    ~/.tmux.conf:
+        source: tmux.conf
+        type: copy
+    ~/.vimrc:
+        source: vimrc
+        type: link
