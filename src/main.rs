@@ -83,7 +83,13 @@ fn process_dot_files(log: &Logger, dot_files: &Yaml) {
 }
 
 fn dot_file_from_settings(target: String, settings: &yaml_rust::yaml::Hash) -> DotFile {
-  DotFile{ source: "<todo>".to_string(), target: target.to_string(), dot_file_type: DotFileType::LINK }
+  let dot_file = DotFile{ source: "<todo>".to_string(), target: target.to_string(), dot_file_type: DotFileType::LINK };
+  for setting in settings {
+    match setting {
+      _ => {}
+    }
+  }
+  dot_file
 }
 
 fn process_dot_file(log: &Logger, dot_file: DotFile) {
