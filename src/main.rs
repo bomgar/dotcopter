@@ -65,13 +65,17 @@ fn process_dot_files(log: &Logger, dot_files: &Yaml) {
         (Yaml::String(target), Yaml::String(source)) =>
           process_dot_file(log, DotFile{ source: source.to_string(), target: target.to_string() }),
         (Yaml::String(target), Yaml::Hash(settings)) =>
-         {},
+          process_dot_file(log, dot_file_from_settings(target, &settings)),
         _ => {}
       }
     }
   } else {
     warn!(log, "Found no entries to process");
   }
+}
+
+fn dot_file_from_settings(target: String, settings: &yaml_rust::yaml::Hash) -> DotFile {
+  DotFile{ source: "<todo>".to_string(), target: target.to_string() }
 }
 
 fn process_dot_file(log: &Logger, dot_file: DotFile) {
