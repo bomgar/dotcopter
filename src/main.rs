@@ -12,6 +12,12 @@ extern crate slog;
 extern crate slog_term;
 extern crate yaml_rust;
 
+#[derive(Debug)]
+struct DotFile {
+  source: String,
+  target: String
+}
+
 fn main() {
   let matches: clap::ArgMatches = create_app().get_matches();
   let stream = slog_term::streamer().full().build();
@@ -58,13 +64,17 @@ fn process_dot_files(log: &Logger, dot_files: &Yaml) {
     for (key, value) in entries {
       match (key.as_str(), value.as_str()) {
         (Some(target), Some(source)) =>
-          info!(log, "Process entry"; "target" => target, "source" => source),
+          process_dot_file(log, DotFile{ source: source.to_string(), target: target.to_string() }),
         _ => {}
       }
     }
   } else {
     warn!(log, "Found no entries to process");
   }
+}
+
+fn process_dot_file(log: &Logger, dot_file: DotFile) {
+  info!(log, "Process entry"; "target" => dot_file.target, "source" => dot_file.source);
 }
 
 fn load_config_file(file: &str) -> Result<String, std::io::Error> {
