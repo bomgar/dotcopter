@@ -6,6 +6,7 @@ use std::io::prelude::*;
 use std::fs::File;
 use yaml_rust::Yaml;
 use model::*;
+use std::path::Path;
 
 #[macro_use]
 extern crate slog;
@@ -62,8 +63,13 @@ fn main() {
 
 
 fn process_dot_file(log: &Logger, dot_file: DotFile) {
-  let log = log.new(o!("target" => dot_file.target, "source" => dot_file.source, "type" => format!("{:?}", dot_file.dot_file_type)));
+  let log = log.new(o!("target" => dot_file.target.clone(), "source" => dot_file.source.clone(), "type" => format!("{:?}", dot_file.dot_file_type)));
   info!(log, "Process entry");
+  let source_path = Path::new(&dot_file.source);
+  if(!source_path.exists()) {
+    warn!(log, "Source path does not exist");
+    return;
+  }
 }
 
 fn load_config_file(file: &str) -> Result<String, std::io::Error> {
