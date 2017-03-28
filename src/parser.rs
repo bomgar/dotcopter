@@ -29,6 +29,7 @@ fn dot_file_from_settings(target: String, settings: &yaml_rust::yaml::Hash) -> D
       (Yaml::String(setting_key), Yaml::String(setting_value)) => {
         match setting_key.as_ref() {
           "src" => dot_file.source = setting_value.to_string(),
+          "type" => dot_file.dot_file_type = dot_file_type_from_string(&setting_value),
           _ => {}
         }
       },
@@ -36,6 +37,14 @@ fn dot_file_from_settings(target: String, settings: &yaml_rust::yaml::Hash) -> D
     }
   }
   dot_file
+}
+
+fn dot_file_type_from_string(s: &str) -> DotFileType {
+  match s.to_lowercase().as_ref() {
+    "copy" => DotFileType::COPY,
+    "link" => DotFileType::LINK,
+    _ => DotFileType::LINK
+  }
 }
 
 #[cfg(test)]
@@ -70,7 +79,7 @@ files:
 
     assert_that(&parsed_dot_files).has_length(3);
     assert_that(&parsed_dot_files).contains(&DotFile{ source: "tpm".to_string(), target: "~/.tmux/plugins/tpm".to_string() , dot_file_type: DotFileType::LINK });
-    assert_that(&parsed_dot_files).contains(&DotFile{ source: "tmux.conf".to_string(), target: "~/.tmux.conf".to_string() , dot_file_type: DotFileType::LINK });
+    assert_that(&parsed_dot_files).contains(&DotFile{ source: "tmux.conf".to_string(), target: "~/.tmux.conf".to_string() , dot_file_type: DotFileType::COPY });
     assert_that(&parsed_dot_files).contains(&DotFile{ source: "vimrc".to_string(), target: "~/.vimrc".to_string() , dot_file_type: DotFileType::LINK });
   }
 }
