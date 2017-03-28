@@ -1,8 +1,8 @@
 files:
     ~/.tmux/plugins/tpm: tpm
     ~/.tmux.conf:
-        source: tmux.conf
+        src: tmux.conf
         type: copy
     ~/.vimrc:
-        source: vimrc
+        src: vimrc
         type: link
