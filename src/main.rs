@@ -5,6 +5,7 @@ use yaml_rust::{YamlLoader};
 use std::io::prelude::*;
 use std::fs::File;
 use yaml_rust::Yaml;
+use model::*;
 
 #[macro_use]
 extern crate slog;
@@ -15,18 +16,8 @@ extern crate yaml_rust;
 #[cfg(test)]
 extern crate spectral;
 
-#[derive(Debug, PartialEq)]
-enum DotFileType {
-  LINK,
-  COPY
-}
-
-#[derive(Debug, PartialEq)]
-struct DotFile {
-  source: String,
-  target: String,
-  dot_file_type: DotFileType
-}
+mod model;
+mod parser;
 
 fn main() {
   let matches: clap::ArgMatches = create_app().get_matches();
@@ -64,45 +55,11 @@ fn main() {
   }
 
   info!(log, "Parsed config file. Liftoff!");
-  for dot_file in parse_dot_files(&log, dot_files) {
+  for dot_file in parser::parse_dot_files(&log, dot_files) {
     process_dot_file(&log, dot_file);
   }
 }
 
-fn parse_dot_files(log: &Logger, dot_files: &Yaml) -> Vec<DotFile> {
-  let mut parsed_dot_files = Vec::new();
-  info!(log, "Processing dotfiles");
-  if let Yaml::Hash(entries) = dot_files.clone() {
-    for (key, value) in entries {
-      match (key, value) {
-        (Yaml::String(target), Yaml::String(source)) =>
-          parsed_dot_files.push(DotFile{ source: source.to_string(), target: target.to_string() , dot_file_type: DotFileType::LINK }),
-        (Yaml::String(target), Yaml::Hash(settings)) =>
-          parsed_dot_files.push(dot_file_from_settings(target, &settings)),
-        _ => {}
-      }
-    }
-  } else {
-    warn!(log, "Found no entries to process");
-  }
-  parsed_dot_files
-}
-
-fn dot_file_from_settings(target: String, settings: &yaml_rust::yaml::Hash) -> DotFile {
-  let mut dot_file = DotFile{ source: "<todo>".to_string(), target: target.to_string(), dot_file_type: DotFileType::LINK };
-  for (key, value) in settings.clone() {
-    match (key, value) {
-      (Yaml::String(setting_key), Yaml::String(setting_value)) => {
-        match setting_key.as_ref() {
-          "src" => dot_file.source = setting_value.to_string(),
-          _ => {}
-        }
-      },
-      _ => {}
-    }
-  }
-  dot_file
-}
 
 fn process_dot_file(log: &Logger, dot_file: DotFile) {
   info!(log, "Process entry"; "target" => dot_file.target, "source" => dot_file.source, "type" => format!("{:?}", dot_file.dot_file_type));
@@ -132,37 +89,3 @@ fn create_app<'a>() -> App<'a, 'a> {
 }
 
 
-#[cfg(test)]
-mod tests {
-  use slog::{DrainExt};
-  use yaml_rust::{YamlLoader};
-  use yaml_rust::Yaml;
-  use super::*;
-  use self::spectral::prelude::*;
-
-
-  #[test]
-  fn parse_config() {
-    let s =
-      "
-files:
-    ~/.tmux/plugins/tpm: tpm
-    ~/.tmux.conf:
-        src: tmux.conf
-        type: copy
-    ~/.vimrc:
-        src: vimrc
-        type: link
-";
-    let yaml_documents = YamlLoader::load_from_str(s).unwrap();
-    let yaml_config = &yaml_documents[0];
-    let dot_files: &Yaml = &yaml_config["files"];
-    let logger = slog::Logger::root(slog_stdlog::StdLog.fuse(), o!());
-    let parsed_dot_files: Vec<DotFile> = parse_dot_files(&logger, dot_files);
-
-    assert_that(&parsed_dot_files).has_length(3);
-    assert_that(&parsed_dot_files).contains(&DotFile{ source: "tpm".to_string(), target: "~/.tmux/plugins/tpm".to_string() , dot_file_type: DotFileType::LINK });
-    assert_that(&parsed_dot_files).contains(&DotFile{ source: "tmux.conf".to_string(), target: "~/.tmux.conf".to_string() , dot_file_type: DotFileType::LINK });
-    assert_that(&parsed_dot_files).contains(&DotFile{ source: "vimrc".to_string(), target: "~/.vimrc".to_string() , dot_file_type: DotFileType::LINK });
-  }
-}
