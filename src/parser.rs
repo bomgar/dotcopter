@@ -12,7 +12,7 @@ pub fn parse_dot_files(log: &Logger, dot_files: &Yaml) -> Vec<DotFile> {
         (Yaml::String(target), Yaml::String(source)) =>
           parsed_dot_files.push(DotFile{ source: source.to_string(), target: target.to_string() , dot_file_type: DotFileType::LINK }),
         (Yaml::String(target), Yaml::Hash(settings)) =>
-          parsed_dot_files.push(dot_file_from_settings(target, &settings)),
+          parsed_dot_files.push(dot_file_from_settings(&log.new(o!("target" => target.clone())), target, &settings)),
         _ => {}
       }
     }
@@ -22,14 +22,14 @@ pub fn parse_dot_files(log: &Logger, dot_files: &Yaml) -> Vec<DotFile> {
   parsed_dot_files
 }
 
-fn dot_file_from_settings(target: String, settings: &yaml_rust::yaml::Hash) -> DotFile {
+fn dot_file_from_settings(log: &Logger, target: String, settings: &yaml_rust::yaml::Hash) -> DotFile {
   let mut dot_file = DotFile{ source: "<todo>".to_string(), target: target.to_string(), dot_file_type: DotFileType::LINK };
   for (key, value) in settings.clone() {
     match (key, value) {
       (Yaml::String(setting_key), Yaml::String(setting_value)) => {
         match setting_key.as_ref() {
           "src" => dot_file.source = setting_value.to_string(),
-          "type" => dot_file.dot_file_type = dot_file_type_from_string(&setting_value),
+          "type" => dot_file.dot_file_type = dot_file_type_from_string(log, &setting_value),
           _ => {}
         }
       },
@@ -39,11 +39,14 @@ fn dot_file_from_settings(target: String, settings: &yaml_rust::yaml::Hash) -> D
   dot_file
 }
 
-fn dot_file_type_from_string(s: &str) -> DotFileType {
+fn dot_file_type_from_string(log: &Logger, s: &str) -> DotFileType {
   match s.to_lowercase().as_ref() {
     "copy" => DotFileType::COPY,
     "link" => DotFileType::LINK,
-    _ => DotFileType::LINK
+    x => {
+      warn!(log, "could not parse file type. fallback to link."; "file_type" => x);
+      DotFileType::LINK
+    }
   }
 }
 
