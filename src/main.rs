@@ -7,6 +7,7 @@ use std::fs::File;
 use yaml_rust::Yaml;
 use model::*;
 use std::path::Path;
+use std::fs;
 
 #[macro_use]
 extern crate slog;
@@ -63,12 +64,26 @@ fn main() {
 
 
 fn process_dot_file(log: &Logger, dot_file: DotFile) {
-  let log = log.new(o!("target" => dot_file.target.clone(), "source" => dot_file.source.clone(), "type" => format!("{:?}", dot_file.dot_file_type)));
+  let log = &log.new(o!("target" => dot_file.target.clone(), "source" => dot_file.source.clone(), "type" => format!("{:?}", dot_file.dot_file_type)));
   info!(log, "Process entry");
   let source_path = Path::new(&dot_file.source);
-  if(!source_path.exists()) {
+  let target_path = Path::new(&dot_file.target);
+  if !source_path.exists() {
     warn!(log, "Source path does not exist");
     return;
+  }
+  // if target_path.exists() {
+  // }
+  link_dot_file(log, source_path, target_path);
+}
+
+fn link_dot_file(log: &Logger, source: &Path, target: &Path) {
+  let result = fs::canonicalize(source).and_then(| canonicalized_source | {
+    std::os::unix::fs::symlink(canonicalized_source, target)
+  });
+  match result {
+    Err(e) => error!(log, "Failed to create link"; "error" => format!("{:?}", e)),
+    Ok(_) => info!(log, "Link created successfully")
   }
 }
 

@@ -1,8 +1,2 @@
 files:
-    ~/.tmux/plugins/tpm: tpm
-    ~/.tmux.conf:
-        src: tmux.conf
-        type: copy
-    ~/.vimrc:
-        src: vimrc
-        type: link
+    /tmp/test.txt: install.conf.yaml
