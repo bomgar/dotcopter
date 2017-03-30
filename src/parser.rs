@@ -1,5 +1,5 @@
 use yaml_rust;
-use slog::{Logger};
+use slog::Logger;
 use yaml_rust::Yaml;
 use model::*;
 
@@ -9,10 +9,16 @@ pub fn parse_dot_files(log: &Logger, dot_files: &Yaml) -> Vec<DotFile> {
   if let Yaml::Hash(entries) = dot_files.clone() {
     for (key, value) in entries {
       match (key, value) {
-        (Yaml::String(target), Yaml::String(source)) =>
-          parsed_dot_files.push(DotFile{ source: source.to_string(), target: target.to_string() , dot_file_type: DotFileType::LINK }),
-        (Yaml::String(target), Yaml::Hash(settings)) =>
-          parsed_dot_files.push(dot_file_from_settings(&log.new(o!("target" => target.clone())), target, &settings)),
+        (Yaml::String(target), Yaml::String(source)) => {
+          parsed_dot_files.push(DotFile {
+                                  source: source.to_string(),
+                                  target: target.to_string(),
+                                  dot_file_type: DotFileType::LINK,
+                                })
+        }
+        (Yaml::String(target), Yaml::Hash(settings)) => {
+          parsed_dot_files.push(dot_file_from_settings(&log.new(o!("target" => target.clone())), target, &settings))
+        }
         _ => {}
       }
     }
@@ -23,7 +29,11 @@ pub fn parse_dot_files(log: &Logger, dot_files: &Yaml) -> Vec<DotFile> {
 }
 
 fn dot_file_from_settings(log: &Logger, target: String, settings: &yaml_rust::yaml::Hash) -> DotFile {
-  let mut dot_file = DotFile{ source: "<todo>".to_string(), target: target.to_string(), dot_file_type: DotFileType::LINK };
+  let mut dot_file = DotFile {
+    source: "<todo>".to_string(),
+    target: target.to_string(),
+    dot_file_type: DotFileType::LINK,
+  };
   for (key, value) in settings.clone() {
     match (key, value) {
       (Yaml::String(setting_key), Yaml::String(setting_value)) => {
@@ -32,7 +42,7 @@ fn dot_file_from_settings(log: &Logger, target: String, settings: &yaml_rust::ya
           "type" => dot_file.dot_file_type = dot_file_type_from_string(log, &setting_value),
           _ => {}
         }
-      },
+      }
       _ => {}
     }
   }
@@ -54,8 +64,8 @@ fn dot_file_type_from_string(log: &Logger, s: &str) -> DotFileType {
 mod tests {
   use slog;
   use slog_stdlog;
-  use slog::{DrainExt};
-  use yaml_rust::{YamlLoader};
+  use slog::DrainExt;
+  use yaml_rust::YamlLoader;
   use yaml_rust::Yaml;
   use super::*;
   use spectral::prelude::*;
@@ -63,8 +73,7 @@ mod tests {
 
   #[test]
   fn parse_config() {
-    let s =
-      "
+    let s = "
 files:
     ~/.tmux/plugins/tpm: tpm
     ~/.tmux.conf:
@@ -81,8 +90,20 @@ files:
     let parsed_dot_files: Vec<DotFile> = parse_dot_files(&logger, dot_files);
 
     assert_that(&parsed_dot_files).has_length(3);
-    assert_that(&parsed_dot_files).contains(&DotFile{ source: "tpm".to_string(), target: "~/.tmux/plugins/tpm".to_string() , dot_file_type: DotFileType::LINK });
-    assert_that(&parsed_dot_files).contains(&DotFile{ source: "tmux.conf".to_string(), target: "~/.tmux.conf".to_string() , dot_file_type: DotFileType::COPY });
-    assert_that(&parsed_dot_files).contains(&DotFile{ source: "vimrc".to_string(), target: "~/.vimrc".to_string() , dot_file_type: DotFileType::LINK });
+    assert_that(&parsed_dot_files).contains(&DotFile {
+                                               source: "tpm".to_string(),
+                                               target: "~/.tmux/plugins/tpm".to_string(),
+                                               dot_file_type: DotFileType::LINK,
+                                             });
+    assert_that(&parsed_dot_files).contains(&DotFile {
+                                               source: "tmux.conf".to_string(),
+                                               target: "~/.tmux.conf".to_string(),
+                                               dot_file_type: DotFileType::COPY,
+                                             });
+    assert_that(&parsed_dot_files).contains(&DotFile {
+                                               source: "vimrc".to_string(),
+                                               target: "~/.vimrc".to_string(),
+                                               dot_file_type: DotFileType::LINK,
+                                             });
   }
 }
