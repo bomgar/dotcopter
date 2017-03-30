@@ -105,7 +105,11 @@ fn link_dot_file(source: &Path, target: &Path) -> Result<(), std::io::Error> {
     try!(fs::create_dir_all(parent));
   }
   if target.exists() {
-    try!(fs::remove_file(target))
+    if target.is_file() {
+      try!(fs::remove_file(target))
+    } else if target.is_dir() {
+      try!(fs::remove_dir_all(target))
+    }
   }
   let canonicalized_source = try!(fs::canonicalize(source));
   try!(std::os::unix::fs::symlink(canonicalized_source, target));
