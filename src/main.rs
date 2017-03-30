@@ -8,6 +8,7 @@ use yaml_rust::Yaml;
 use model::*;
 use std::path::Path;
 use std::fs;
+use std::error::Error;
 
 #[macro_use]
 extern crate slog;
@@ -39,7 +40,7 @@ fn main() {
   let config = match load_config_file(config_file) {
     Ok(content) => content,
     Err(e) => {
-      error!(log, "Failed to load config file."; "error" => format!("{:?}", e));
+      error!(log, "Failed to load config file."; "error" => e.description());
       panic!(1)
     }
   };
@@ -47,7 +48,7 @@ fn main() {
   let yaml_documents = match YamlLoader::load_from_str(&config) {
     Ok(yaml) => yaml,
     Err(e) => {
-      error!(log, "Failed to parse config file."; "error" => format!("{:?}", e));
+      error!(log, "Failed to parse config file."; "error" => e.description());
       panic!(2)
     }
   };
@@ -81,12 +82,12 @@ fn process_dot_file(log: &Logger, dot_file: DotFile, force: bool) {
       } else {
         let result = link_dot_file(source_path, target_path);
         match result {
-          Err(e) => error!(log, "Failed to create link"; "error" => format!("{:?}", e)),
+          Err(e) => error!(log, "Failed to create link"; "error" => e.description()),
           Ok(_) => info!(log, "Link created successfully"),
         }
       }
     }
-    Err(e) => error!(log, "Failed to check link existence"; "error" => format!("{:?}", e)),
+    Err(e) => error!(log, "Failed to check link existence"; "error" => e.description()),
   }
 }
 
