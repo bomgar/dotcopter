@@ -25,6 +25,7 @@ fn main() {
   let matches: clap::ArgMatches = create_app().get_matches();
   let stream = slog_term::streamer().full().build();
   let verbose: bool = matches.is_present("verbose");
+  let force: bool = matches.is_present("force");
   let log = if verbose {
     slog::Logger::root(stream.fuse(), o!())
   } else {
@@ -58,12 +59,12 @@ fn main() {
 
   info!(log, "Parsed config file. Liftoff!");
   for dot_file in parser::parse_dot_files(&log, dot_files) {
-    process_dot_file(&log, dot_file);
+    process_dot_file(&log, dot_file, force);
   }
 }
 
 
-fn process_dot_file(log: &Logger, dot_file: DotFile) {
+fn process_dot_file(log: &Logger, dot_file: DotFile, force: bool) {
   let log = &log.new(o!("target" => dot_file.target.clone(), "source" => dot_file.source.clone(), "type" => format!("{:?}", dot_file.dot_file_type)));
   info!(log, "Process entry");
   let source_path = Path::new(&dot_file.source);
@@ -75,7 +76,7 @@ fn process_dot_file(log: &Logger, dot_file: DotFile) {
   match already_linked(source_path, target_path) {
     Ok(true) => info!(log, "Link already exists"),
     Ok(false) => {
-      if target_path.exists() {
+      if !force && target_path.exists() {
         error!(log, "Target exists but does not point to source")
       } else {
         let result = link_dot_file(source_path, target_path);
@@ -102,6 +103,9 @@ fn already_linked(source: &Path, target: &Path) -> Result<bool, std::io::Error> 
 fn link_dot_file(source: &Path, target: &Path) -> Result<(), std::io::Error> {
   if let Some(parent) = target.parent() {
     try!(fs::create_dir_all(parent));
+  }
+  if target.exists() {
+    try!(fs::remove_file(target))
   }
   let canonicalized_source = try!(fs::canonicalize(source));
   try!(std::os::unix::fs::symlink(canonicalized_source, target));
