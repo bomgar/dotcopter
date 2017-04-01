@@ -69,7 +69,7 @@ fn main() {
 
 fn process_dot_file(log: &Logger, dot_file: DotFile, force: bool) {
   let log = &log.new(o!("target" => dot_file.target.clone(), "source" => dot_file.source.clone(), "type" => format!("{:?}", dot_file.dot_file_type)));
-  info!(log, "Process entry");
+  debug!(log, "Process entry");
   let source_path = Path::new(&dot_file.source);
   let target_path = Path::new(&dot_file.target);
   if !source_path.exists() {
@@ -84,22 +84,46 @@ fn process_dot_file(log: &Logger, dot_file: DotFile, force: bool) {
 
 fn process_copy(log: &Logger, source_path: &Path, target_path: &Path, force: bool) {
   match has_same_content(log, source_path, target_path) {
-    Ok(true) => {},
-    Ok(false) => {},
+    Ok(true) => info!(log, "File already there"),
+    Ok(false) => {
+      if !force && target_path.exists() {
+        error!(log, "Target already exists but has different content.");
+        return;
+      }
+      match copy_dot_file(source_path, target_path) {
+        Ok(_) => info!(log, "Copied file successfully"),
+        Err(e) => error!(log, "Failed to copy file"; "error" => e.description())
+      }
+    },
     Err(e) => error!(log, "Failed to copy dotfile"; "error" => e.description())
   }
 }
 
-fn has_same_content(log: &Logger, source_path: &Path, target_path: &Path) -> Result<bool, std::io::Error> {
-  if !target_path.exists() {
+fn copy_dot_file(source: &Path, target: &Path) -> Result<(), std::io::Error> {
+  if let Some(parent) = target.parent() {
+    try!(fs::create_dir_all(parent));
+  }
+  if target.exists() {
+    if target.is_file() {
+      try!(fs::remove_file(target))
+    } else if target.is_dir() {
+      try!(fs::remove_dir_all(target))
+    }
+  }
+  try!(fs::copy(source, target));
+  Ok(())
+}
+
+fn has_same_content(log: &Logger, source: &Path, target: &Path) -> Result<bool, std::io::Error> {
+  if !target.exists() {
     Ok(false)
-  } else if target_path.is_dir() || source_path.is_dir() {
+  } else if target.is_dir() || source.is_dir() {
     Ok(false) //TODO: ???
   } else {
-    let source_hash = try!(checksum::hash(source_path));
-    let target_hash = try!(checksum::hash(source_path));
+    let source_hash = try!(checksum::hash(source));
+    let target_hash = try!(checksum::hash(target));
     debug!(log, "Hashed files"; "target_hash" => target_hash, "source_hash" => source_hash);
-    Ok(true)
+    Ok(source_hash == target_hash)
   }
 }
 
