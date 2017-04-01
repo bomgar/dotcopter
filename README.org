@@ -3,7 +3,7 @@
   Tool to manage your dotfile installation.
 
 ** Configuration
-   Just provide a file describing your dotfiles ([[file://install.conf.yaml][example]]). Dotcopter
+   Just provide a file describing your dotfiles ([[file:install.conf.yaml][example]]). Dotcopter
    will not overwrite existing files without the force flag.
    
    
