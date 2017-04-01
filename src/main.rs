@@ -83,19 +83,22 @@ fn process_dot_file(log: &Logger, dot_file: DotFile, force: bool) {
 }
 
 fn process_copy(log: &Logger, source_path: &Path, target_path: &Path, force: bool) {
-  match has_same_content(source_path, target_path) {
+  match has_same_content(log, source_path, target_path) {
     Ok(true) => {},
     Ok(false) => {},
     Err(e) => error!(log, "Failed to copy dotfile"; "error" => e.description())
   }
 }
 
-fn has_same_content(source_path: &Path, target_path: &Path) -> Result<bool, std::io::Error> {
+fn has_same_content(log: &Logger, source_path: &Path, target_path: &Path) -> Result<bool, std::io::Error> {
   if !target_path.exists() {
     Ok(false)
-  } else if target_path.is_dir() {
+  } else if target_path.is_dir() || source_path.is_dir() {
     Ok(false) //TODO: ???
   } else {
+    let source_hash = try!(checksum::hash(source_path));
+    let target_hash = try!(checksum::hash(source_path));
+    debug!(log, "Hashed files"; "target_hash" => target_hash, "source_hash" => source_hash);
     Ok(true)
   }
 }
