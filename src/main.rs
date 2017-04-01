@@ -15,12 +15,14 @@ extern crate slog;
 extern crate slog_term;
 extern crate slog_stdlog;
 extern crate yaml_rust;
+extern crate crypto;
 
 #[cfg(test)]
 extern crate spectral;
 
 mod model;
 mod parser;
+mod checksum;
 
 fn main() {
   let matches: clap::ArgMatches = create_app().get_matches();
@@ -74,6 +76,31 @@ fn process_dot_file(log: &Logger, dot_file: DotFile, force: bool) {
     warn!(log, "Source path does not exist");
     return;
   }
+  match dot_file.dot_file_type {
+    DotFileType::LINK => process_link(log, source_path, target_path, force),
+    DotFileType::COPY => process_copy(log, source_path, target_path, force)
+  }
+}
+
+fn process_copy(log: &Logger, source_path: &Path, target_path: &Path, force: bool) {
+  match has_same_content(source_path, target_path) {
+    Ok(true) => {},
+    Ok(false) => {},
+    Err(e) => error!(log, "Failed to copy dotfile"; "error" => e.description())
+  }
+}
+
+fn has_same_content(source_path: &Path, target_path: &Path) -> Result<bool, std::io::Error> {
+  if !target_path.exists() {
+    Ok(false)
+  } else if target_path.is_dir() {
+    Ok(false) //TODO: ???
+  } else {
+    Ok(true)
+  }
+}
+
+fn process_link(log: &Logger, source_path: &Path, target_path: &Path, force: bool) {
   match already_linked(source_path, target_path) {
     Ok(true) => info!(log, "Link already exists"),
     Ok(false) => {
