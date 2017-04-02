@@ -1,6 +1,6 @@
 [package]
 name = "dotcopter"
-version = "0.1.1"
+version = "0.1.2-pre"
 authors = ["Patrick Haun <bomgar85@googlemail.com>"]
 description = "A small tool to manage dotfile installation"
 repository = "https://github.com/bomgar/dotcopter"
