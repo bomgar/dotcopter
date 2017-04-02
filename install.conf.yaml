@@ -1,5 +1,5 @@
 files:
-    /tmp/adfasfdasf/test.txt: install.conf.yaml
+    ~/tmp/adfasfdasf/test.txt: install.conf.yaml
     /tmp/adfasfdasf/blubb.txt:
         src: install.conf.yaml
         type: LINK
