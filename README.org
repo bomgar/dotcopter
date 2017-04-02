@@ -1,5 +1,6 @@
 * Dotcopter
 
+  [[https://crates.io/crates/dotcopter][file:https://img.shields.io/crates/v/dotcopter.svg]]
   [[https://travis-ci.org/bomgar/dotcopter][file:https://travis-ci.org/bomgar/dotcopter.svg?branch=master]]
 
   Tool to manage your dotfile installation.
