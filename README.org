@@ -6,6 +6,11 @@
   Tool to manage your dotfile installation. This is a very early
   version so bugs are to be expected.
   
+** Installation
+   #+BEGIN_SRC shell-script
+   cargo install dotcopter
+   #+END_SRC
+
 ** Configuration
    Just provide a file describing your dotfiles ([[file:install.conf.yaml][example]]). Dotcopter
    will not overwrite existing files without the force flag.
@@ -15,3 +20,4 @@
    #+BEGIN_SRC shell-script
    dotcopter --help
    #+END_SRC
+   
