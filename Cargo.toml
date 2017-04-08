@@ -12,7 +12,7 @@ license = "Apache-2.0"
 clap = "2.22"
 slog-term = "1"
 slog-stdlog = "1"
-spectral = "0.6"
+#spectral = "0.6"
 rust-crypto = "0.2"
 
 [dependencies.slog]
