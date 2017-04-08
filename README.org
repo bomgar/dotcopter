@@ -17,7 +17,16 @@
    
    
 ** Usage
-   #+BEGIN_SRC shell-script
-   dotcopter --help
-   #+END_SRC
+*** Help
+    #+BEGIN_SRC shell-script
+    dotcopter --help
+    #+END_SRC
+*** Apply a configuration
+    #+BEGIN_SRC shell-script
+    dotcopter install.conf.yaml apply
+    #+END_SRC
+*** Add a new link to a dotfile
+    #+BEGIN_SRC shell-script
+    dotcopter install.conf.yaml ln zshrc "~/.zshrc"
+    #+END_SRC
    
