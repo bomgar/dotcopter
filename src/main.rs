@@ -68,15 +68,15 @@ fn main() {
     files::process_dot_files(&log, dot_files, force);
   } else if let Some(ln_matches) = maybe_ln_matches {
     let yaml_config = &yaml_documents[0];
-    let source = ln_matches.value_of("source").unwrap();
-    let destination = ln_matches.value_of("destination").unwrap();
-    let log = log.new(o!("source" => source.to_string(), "destination" => destination.to_string()));
+    let link_target = ln_matches.value_of("link_target").unwrap();
+    let link_name = ln_matches.value_of("link_name").unwrap();
+    let log = log.new(o!("link_target" => link_target.to_string(), "link_name" => link_name.to_string()));
     info!(log, "Liftoff! Adding new link to configuration");
     let new_config = mutate::add_dotfile_to_config(&log,
                                                    &yaml_config,
                                                    model::DotFile {
-                                                     target: destination.to_string(),
-                                                     source: source.to_string(),
+                                                     target: link_name.to_string(),
+                                                     source: link_target.to_string(),
                                                      dot_file_type: model::DotFileType::LINK,
                                                    });
     write_new_yaml(&log, &new_config, &config_file);
@@ -140,6 +140,6 @@ fn create_app<'a>() -> App<'a, 'a> {
     .subcommand(SubCommand::with_name("apply").about("applies a dotfile configuration"))
     .subcommand(SubCommand::with_name("ln")
                   .about("adds new link to configuration")
-                  .arg(Arg::with_name("source").required(true))
-                  .arg(Arg::with_name("destination").required(true)))
+                  .arg(Arg::with_name("link_target").required(true))
+                  .arg(Arg::with_name("link_name").required(true)))
 }
