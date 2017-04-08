@@ -1,11 +1,12 @@
 extern crate clap;
-use clap::{Arg, App, AppSettings};
-use slog::{LevelFilter, Level, DrainExt};
+use clap::{Arg, App, AppSettings, SubCommand};
+use slog::{LevelFilter, Level, DrainExt, Logger};
 use yaml_rust::YamlLoader;
 use std::io::prelude::*;
 use std::fs::File;
-use yaml_rust::Yaml;
+use yaml_rust::{Yaml, YamlEmitter};
 use std::error::Error;
+use std::path::Path;
 
 #[macro_use]
 extern crate slog;
@@ -18,9 +19,10 @@ extern crate crypto;
 extern crate spectral;
 
 mod model;
-mod parser;
+mod config;
 mod checksum;
 mod files;
+mod mutate;
 
 fn main() {
   let matches: clap::ArgMatches = create_app().get_matches();
@@ -37,7 +39,7 @@ fn main() {
   let config_file = matches.value_of("config_file").unwrap();
   info!(log, "Starting engine"; "config_file" => config_file);
 
-  let config = match load_config_file(config_file) {
+  let config = match load_config_file(&log, config_file) {
     Ok(content) => content,
     Err(e) => {
       error!(log, "Failed to load config file."; "error" => e.description());
@@ -45,26 +47,79 @@ fn main() {
     }
   };
 
-  let yaml_documents = match YamlLoader::load_from_str(&config) {
+  let mut yaml_documents = match YamlLoader::load_from_str(&config) {
     Ok(yaml) => yaml,
     Err(e) => {
       error!(log, "Failed to parse config file."; "error" => e.description());
       panic!(2)
     }
   };
-  let yaml_config = &yaml_documents[0];
-  let dot_files: &Yaml = &yaml_config["files"];
+  if yaml_documents.len() == 0 {
+    let s = "files:";
+    yaml_documents = YamlLoader::load_from_str(s).unwrap();
+  }
 
-  info!(log, "Liftoff!");
-
-  files::process_dot_files(&log, dot_files, force);
+  let maybe_ln_matches = matches.subcommand_matches("ln");
+  let maybe_test_matches = matches.subcommand_matches("apply");
+  if let Some(_) = maybe_test_matches {
+    let yaml_config = &yaml_documents[0];
+    let dot_files: &Yaml = &yaml_config["files"];
+    info!(log, "Liftoff! Applying configuration.");
+    files::process_dot_files(&log, dot_files, force);
+  } else if let Some(ln_matches) = maybe_ln_matches {
+    let yaml_config = &yaml_documents[0];
+    let source = ln_matches.value_of("source").unwrap();
+    let destination = ln_matches.value_of("destination").unwrap();
+    let log = log.new(o!("source" => source.to_string(), "destination" => destination.to_string()));
+    info!(log, "Liftoff! Adding new link to configuration");
+    let new_config = mutate::add_dotfile_to_config(&log,
+                                                   &yaml_config,
+                                                   model::DotFile {
+                                                     target: destination.to_string(),
+                                                     source: source.to_string(),
+                                                     dot_file_type: model::DotFileType::LINK,
+                                                   });
+    write_new_yaml(&log, &new_config, &config_file);
+  }
 }
 
-fn load_config_file(file: &str) -> Result<String, std::io::Error> {
-  let mut file = try!(File::open(file));
-  let mut content = String::new();
-  try!(file.read_to_string(&mut content));
-  return Ok(content);
+
+fn write_new_yaml(log: &Logger, document: &Yaml, config_file: &str) {
+  let mut out_str = String::new();
+  {
+    let mut emitter = YamlEmitter::new(&mut out_str);
+    match emitter.dump(document) {
+      Ok(_) => {}
+      Err(e) => {
+        error!(log, "Failed to write config file."; "error" => format!("{:?}", e));
+        return;
+      }
+    }
+  }
+  out_str.push_str("\n");
+  match write_config_file(config_file, &out_str) {
+    Ok(_) => info!(log, "Successfully written configuration"),
+    Err(e) => error!(log, "Failed to write config file."; "error" => e.description()),
+  };
+}
+
+fn write_config_file(file: &str, content: &str) -> Result<(), std::io::Error> {
+  let mut file = try!(File::create(file));
+  try!(file.write_all(content.as_bytes()));
+  Ok(())
+}
+
+fn load_config_file(log: &Logger, file: &str) -> Result<String, std::io::Error> {
+  let path = Path::new(file);
+  if path.exists() {
+    let mut file = try!(File::open(file));
+    let mut content = String::new();
+    try!(file.read_to_string(&mut content));
+    return Ok(content);
+  } else {
+    warn!(log, "Configuration doesn't exit"; "file" => file);
+    Ok("".to_string())
+  }
 }
 
 
@@ -82,4 +137,9 @@ fn create_app<'a>() -> App<'a, 'a> {
            .required(false)
            .takes_value(false))
     .arg(Arg::with_name("config_file").required(true))
+    .subcommand(SubCommand::with_name("apply").about("applies a dotfile configuration"))
+    .subcommand(SubCommand::with_name("ln")
+                  .about("adds new link to configuration")
+                  .arg(Arg::with_name("source").required(true))
+                  .arg(Arg::with_name("destination").required(true)))
 }

@@ -5,7 +5,7 @@ use model::*;
 use std::path::Path;
 use std::fs;
 use std::error::Error;
-use parser;
+use config;
 use checksum;
 use std;
 use std::env;
@@ -14,7 +14,7 @@ pub fn process_dot_files(log: &Logger, dot_files: &Yaml, force: bool) {
   if dot_files.is_badvalue() {
     warn!(log, "Empty files list");
   } else {
-    for dot_file in parser::parse_dot_files(&log, dot_files) {
+    for dot_file in config::parse_dot_files(&log, dot_files) {
       process_dot_file(&log, dot_file, force);
     }
   }

@@ -12,13 +12,16 @@ license = "Apache-2.0"
 clap = "2.22"
 slog-term = "1"
 slog-stdlog = "1"
-yaml-rust = "0.3"
-#spectral = "0.6"
+spectral = "0.6"
 rust-crypto = "0.2"
 
 [dependencies.slog]
 version = "1"
 features = ["release_max_level_trace", "max_level_debug"]
+
+[dependencies.yaml-rust]
+version = "0.3"
+features = ["preserve_order"]
 
 [dev-dependencies]
 spectral = "0.6.0"
