@@ -60,6 +60,7 @@ fn main() {
   }
 
   let maybe_ln_matches = matches.subcommand_matches("ln");
+  let maybe_cp_matches = matches.subcommand_matches("cp");
   let maybe_test_matches = matches.subcommand_matches("apply");
   if let Some(_) = maybe_test_matches {
     let yaml_config = &yaml_documents[0];
@@ -78,6 +79,20 @@ fn main() {
                                                      target: link_name.to_string(),
                                                      source: link_target.to_string(),
                                                      dot_file_type: model::DotFileType::LINK,
+                                                   });
+    write_new_yaml(&log, &new_config, &config_file);
+  } else if let Some(cp_matches) = maybe_cp_matches {
+    let yaml_config = &yaml_documents[0];
+    let target = cp_matches.value_of("target").unwrap();
+    let source = cp_matches.value_of("source").unwrap();
+    let log = log.new(o!("target" => target.to_string(), "source" => source.to_string()));
+    info!(log, "Liftoff! Adding new copy to configuration");
+    let new_config = mutate::add_dotfile_to_config(&log,
+                                                   &yaml_config,
+                                                   model::DotFile {
+                                                     target: target.to_string(),
+                                                     source: source.to_string(),
+                                                     dot_file_type: model::DotFileType::COPY,
                                                    });
     write_new_yaml(&log, &new_config, &config_file);
   }
@@ -142,4 +157,8 @@ fn create_app<'a>() -> App<'a, 'a> {
                   .about("adds new link to configuration")
                   .arg(Arg::with_name("link_target").required(true))
                   .arg(Arg::with_name("link_name").required(true)))
+    .subcommand(SubCommand::with_name("cp")
+                  .about("adds new copy to configuration")
+                  .arg(Arg::with_name("source").required(true))
+                  .arg(Arg::with_name("target").required(true)))
 }

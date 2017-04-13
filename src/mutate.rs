@@ -22,7 +22,9 @@ fn add_dotfile_to_files(files: &Yaml, dotfile: model::DotFile) -> Yaml {
   } else {
     yaml::Hash::new()
   };
-  new_hash.insert(Yaml::String(dotfile.target.to_string()),
-                  Yaml::String(dotfile.source.to_string()));
+  let mut prop_hash = yaml::Hash::new();
+  prop_hash.insert(Yaml::String("src".to_string()), Yaml::String(dotfile.source.to_string()));
+  prop_hash.insert(Yaml::String("type".to_string()), Yaml::String(format!("{:?}", dotfile.dot_file_type)));
+  new_hash.insert(Yaml::String(dotfile.target.to_string()), Yaml::Hash(prop_hash));
   Yaml::Hash(new_hash)
 }
