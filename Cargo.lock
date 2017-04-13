@@ -1,6 +1,6 @@
 [root]
 name = "dotcopter"
-version = "0.1.4"
+version = "0.1.5-pre"
 dependencies = [
  "clap 2.22.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust-crypto 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
