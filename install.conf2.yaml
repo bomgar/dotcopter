@@ -2,10 +2,18 @@
 files: 
   /tmp/test: install.conf.yaml
   /tmp/testa: install.conf.yaml
-  /tmp/testaa: install.conf.yaml
   /tmp/sdfsdfsdf.yaml: 
     src: install.conf.yaml
     type: COPY
   /tmp/sdfsdfsdfsdfsdf.yaml: 
+    src: install.conf.yaml
+    type: LINK
+  /tmp/testaa: 
+    src: install.conf.yaml
+    type: LINK
+  /tmp/testaasdsdfsdf: 
+    src: install.conf.yaml
+    type: LINK
+  /tmp/vec: 
     src: install.conf.yaml
     type: LINK
