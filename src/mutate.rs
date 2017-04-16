@@ -33,3 +33,58 @@ fn add_dotfiles_to_files(files: &Yaml, dotfiles: &[model::DotFile]) -> Yaml {
   }
   Yaml::Hash(new_hash)
 }
+#[cfg(test)]
+mod tests {
+  use slog;
+  use slog_stdlog;
+  use slog::DrainExt;
+  use yaml_rust::YamlLoader;
+  use yaml_rust::{Yaml, YamlEmitter};
+  use super::*;
+  use spectral::prelude::*;
+  use model::{DotFile, DotFileType};
+
+
+  #[test]
+  fn parse_config() {
+    let s = "
+files:
+    ~/.tmux/plugins/tpm: tpm
+    ~/.tmux.conf:
+        src: tmux.conf
+        type: copy
+    ~/.vimrc:
+        src: vimrc
+        type: link
+";
+    let yaml_documents = YamlLoader::load_from_str(s).unwrap();
+    let yaml_config = &yaml_documents[0];
+    let logger = slog::Logger::root(slog_stdlog::StdLog.fuse(), o!());
+    let new_files = [DotFile {
+                       source: "test".to_string(),
+                       target: "~/test".to_string(),
+                       dot_file_type: DotFileType::LINK,
+                     }];
+    let new_config = add_dotfiles_to_config(&logger, &yaml_config, &new_files);
+    let mut out_str = String::new();
+    {
+      let mut emitter = YamlEmitter::new(&mut out_str);
+      emitter.dump(&new_config).unwrap();
+    }
+
+    let expected = "---
+files: 
+  ~/.tmux/plugins/tpm: tpm
+  ~/.tmux.conf: 
+    src: tmux.conf
+    type: copy
+  ~/.vimrc: 
+    src: vimrc
+    type: link
+  ~/test: 
+    src: test
+    type: LINK".to_string();
+
+    assert_that(&out_str).is_equal_to(expected);
+  }
+}
