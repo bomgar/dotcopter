@@ -76,12 +76,12 @@ fn main() {
     let log = log.new(o!("link_target" => link_target.to_string(), "link_name" => link_name.to_string()));
     info!(log, "Liftoff! Adding new link to configuration");
     let new_config = mutate::add_dotfiles_to_config(&log,
-                                                   yaml_config,
-                                                   &[model::DotFile {
-                                                     target: link_name.to_string(),
-                                                     source: link_target.to_string(),
-                                                     dot_file_type: model::DotFileType::LINK,
-                                                   }]);
+                                                    yaml_config,
+                                                    &[model::DotFile {
+                                                        target: link_name.to_string(),
+                                                        source: link_target.to_string(),
+                                                        dot_file_type: model::DotFileType::LINK,
+                                                      }]);
     write_new_yaml(&log, &new_config, config_file);
   } else if let Some(cp_matches) = maybe_cp_matches {
     let yaml_config = &yaml_documents[0];
@@ -90,20 +90,23 @@ fn main() {
     let log = log.new(o!("target" => target.to_string(), "source" => source.to_string()));
     info!(log, "Liftoff! Adding new copy to configuration");
     let new_config = mutate::add_dotfiles_to_config(&log,
-                                                   yaml_config,
-                                                   &[model::DotFile {
-                                                     target: target.to_string(),
-                                                     source: source.to_string(),
-                                                     dot_file_type: model::DotFileType::COPY,
-                                                   }]);
+                                                    yaml_config,
+                                                    &[model::DotFile {
+                                                        target: target.to_string(),
+                                                        source: source.to_string(),
+                                                        dot_file_type: model::DotFileType::COPY,
+                                                      }]);
     write_new_yaml(&log, &new_config, config_file);
   } else if let Some(import_matches) = maybe_import_matches {
-    let  dir =  import_matches.value_of("dir").unwrap();
-    let log = log.new(o!("directory" => dir.to_string()));
+    let dir = import_matches.value_of("dir").unwrap();
+    let log = log.new(o!("import_directory" => dir.to_string()));
     let yaml_config = &yaml_documents[0];
     info!(log, "Liftoff! Importing to configuration");
     let dot_files = import::scan_dir(&log, dir);
-    mutate::add_dotfiles_to_config(&log, yaml_config, &dot_files);
+    if !dot_files.is_empty() {
+      let new_config = mutate::add_dotfiles_to_config(&log, yaml_config, &dot_files);
+      write_new_yaml(&log, &new_config, config_file);
+    }
   }
 }
 
@@ -153,7 +156,10 @@ fn create_app<'a>() -> App<'a, 'a> {
     .setting(AppSettings::ColoredHelp)
     .author("Patrick Haun <bomgar85@googlemail.com>")
     .about("manages dotfiles installation")
-    .arg(Arg::with_name("force").short("f").long("force").takes_value(false))
+    .arg(Arg::with_name("force")
+           .short("f")
+           .long("force")
+           .takes_value(false))
     .arg(Arg::with_name("verbose")
            .long("verbose")
            .short("v")
