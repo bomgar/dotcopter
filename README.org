@@ -29,4 +29,9 @@
     #+BEGIN_SRC shell-script
     dotcopter install.conf.yaml ln zshrc "~/.zshrc"
     #+END_SRC
+*** Import directory
+    To make the initial configuration easier dotcopter can import existing links.
+    #+BEGIN_SRC shell-script
+    dotcopter install.conf.yaml import ~
+    #+END_SRC
    
