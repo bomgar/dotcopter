@@ -65,7 +65,7 @@ files:
                        target: "~/test".to_string(),
                        dot_file_type: DotFileType::LINK,
                      }];
-    let new_config = add_dotfiles_to_config(&logger, &yaml_config, &new_files);
+    let new_config: Yaml = add_dotfiles_to_config(&logger, &yaml_config, &new_files);
     let mut out_str = String::new();
     {
       let mut emitter = YamlEmitter::new(&mut out_str);

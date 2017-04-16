@@ -1,5 +1,4 @@
 use model::{DotFile, DotFileType};
-use std::io::prelude::*;
 use std::path::Path;
 use std::path::PathBuf;
 use std;
