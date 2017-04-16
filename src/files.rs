@@ -14,14 +14,14 @@ pub fn process_dot_files(log: &Logger, dot_files: &Yaml, force: bool) {
   if dot_files.is_badvalue() {
     warn!(log, "Empty files list");
   } else {
-    for dot_file in config::parse_dot_files(&log, dot_files) {
-      process_dot_file(&log, dot_file, force);
+    for dot_file in config::parse_dot_files(log, dot_files) {
+      process_dot_file(log, &dot_file, force);
     }
   }
 }
 
 
-fn process_dot_file(log: &Logger, dot_file: DotFile, force: bool) {
+fn process_dot_file(log: &Logger, dot_file: &DotFile, force: bool) {
   let log = &log.new(o!("target" => dot_file.target.clone(), "source" => dot_file.source.clone(), "type" => format!("{:?}", dot_file.dot_file_type)));
   debug!(log, "Process entry");
   let source_with_resolved_home = resolve_home(log, &dot_file.source);
@@ -40,7 +40,7 @@ fn process_dot_file(log: &Logger, dot_file: DotFile, force: bool) {
 
 fn resolve_home(log: &Logger, path: &str) -> String {
   if let Some(home_dir) = env::home_dir() {
-    if path.starts_with("~") {
+    if path.starts_with('~') {
       let mut home_string = home_dir.into_os_string().into_string().expect("home_dir should be a valid string");
       home_string.push_str(&path[1..]);
       return home_string;

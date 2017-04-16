@@ -4,7 +4,7 @@ use yaml_rust::yaml;
 use yaml_rust::Yaml;
 use model;
 
-pub fn add_dotfiles_to_config(log: &Logger, config: &Yaml, dotfiles: &Vec<model::DotFile>) -> Yaml {
+pub fn add_dotfiles_to_config(log: &Logger, config: &Yaml, dotfiles: &[model::DotFile]) -> Yaml {
   let mut new_hash = if let Yaml::Hash(config_hash) = config.clone() {
     config_hash
   } else {
@@ -16,7 +16,7 @@ pub fn add_dotfiles_to_config(log: &Logger, config: &Yaml, dotfiles: &Vec<model:
   Yaml::Hash(new_hash)
 }
 
-fn add_dotfiles_to_files(files: &Yaml, dotfiles: &Vec<model::DotFile>) -> Yaml {
+fn add_dotfiles_to_files(files: &Yaml, dotfiles: &[model::DotFile]) -> Yaml {
   let mut new_hash = if let Yaml::Hash(files_hash) = files.clone() {
     files_hash
   } else {

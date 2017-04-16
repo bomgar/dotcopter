@@ -17,7 +17,7 @@ pub fn parse_dot_files(log: &Logger, dot_files: &Yaml) -> Vec<DotFile> {
                                 })
         }
         (Yaml::String(target), Yaml::Hash(settings)) => {
-          parsed_dot_files.push(dot_file_from_settings(&log.new(o!("target" => target.clone())), target, &settings))
+          parsed_dot_files.push(dot_file_from_settings(&log.new(o!("target" => target.clone())), &target, &settings))
         }
         _ => {}
       }
@@ -28,24 +28,21 @@ pub fn parse_dot_files(log: &Logger, dot_files: &Yaml) -> Vec<DotFile> {
   parsed_dot_files
 }
 
-fn dot_file_from_settings(log: &Logger, target: String, settings: &yaml_rust::yaml::Hash) -> DotFile {
+fn dot_file_from_settings(log: &Logger, target: &str, settings: &yaml_rust::yaml::Hash) -> DotFile {
   let mut dot_file = DotFile {
     source: "<todo>".to_string(),
     target: target.to_string(),
     dot_file_type: DotFileType::LINK,
   };
   for (key, value) in settings.clone() {
-    match (key, value) {
-      (Yaml::String(setting_key), Yaml::String(setting_value)) => {
+      if let (Yaml::String(setting_key), Yaml::String(setting_value)) = (key, value) {
         match setting_key.as_ref() {
           "src" => dot_file.source = setting_value.to_string(),
           "type" => dot_file.dot_file_type = dot_file_type_from_string(log, &setting_value),
           _ => {}
         }
       }
-      _ => {}
     }
-  }
   dot_file
 }
 

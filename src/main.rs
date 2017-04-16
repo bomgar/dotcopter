@@ -55,7 +55,7 @@ fn main() {
       panic!(2)
     }
   };
-  if yaml_documents.len() == 0 {
+  if yaml_documents.is_empty() {
     let s = "files:";
     yaml_documents = YamlLoader::load_from_str(s).unwrap();
   }
@@ -64,7 +64,7 @@ fn main() {
   let maybe_cp_matches = matches.subcommand_matches("cp");
   let maybe_apply_matches = matches.subcommand_matches("apply");
   let maybe_import_matches = matches.subcommand_matches("import");
-  if let Some(_) = maybe_apply_matches {
+  if maybe_apply_matches.is_some() {
     let yaml_config = &yaml_documents[0];
     let dot_files: &Yaml = &yaml_config["files"];
     info!(log, "Liftoff! Applying configuration.");
@@ -76,13 +76,13 @@ fn main() {
     let log = log.new(o!("link_target" => link_target.to_string(), "link_name" => link_name.to_string()));
     info!(log, "Liftoff! Adding new link to configuration");
     let new_config = mutate::add_dotfiles_to_config(&log,
-                                                   &yaml_config,
-                                                   &vec![model::DotFile {
+                                                   yaml_config,
+                                                   &[model::DotFile {
                                                      target: link_name.to_string(),
                                                      source: link_target.to_string(),
                                                      dot_file_type: model::DotFileType::LINK,
                                                    }]);
-    write_new_yaml(&log, &new_config, &config_file);
+    write_new_yaml(&log, &new_config, config_file);
   } else if let Some(cp_matches) = maybe_cp_matches {
     let yaml_config = &yaml_documents[0];
     let target = cp_matches.value_of("target").unwrap();
@@ -90,19 +90,19 @@ fn main() {
     let log = log.new(o!("target" => target.to_string(), "source" => source.to_string()));
     info!(log, "Liftoff! Adding new copy to configuration");
     let new_config = mutate::add_dotfiles_to_config(&log,
-                                                   &yaml_config,
-                                                   &vec![model::DotFile {
+                                                   yaml_config,
+                                                   &[model::DotFile {
                                                      target: target.to_string(),
                                                      source: source.to_string(),
                                                      dot_file_type: model::DotFileType::COPY,
                                                    }]);
-    write_new_yaml(&log, &new_config, &config_file);
+    write_new_yaml(&log, &new_config, config_file);
   } else if let Some(import_matches) = maybe_import_matches {
     let yaml_config = &yaml_documents[0];
     let  dir =  import_matches.value_of("dir").unwrap();
     info!(log, "Liftoff! Importing to configuration");
-    let dot_files = import::scan_dir(&dir);
-    mutate::add_dotfiles_to_config(&log, &yaml_config, &dot_files);
+    let dot_files = import::scan_dir(dir);
+    mutate::add_dotfiles_to_config(&log, yaml_config, &dot_files);
   }
 }
 
@@ -138,7 +138,7 @@ fn load_config_file(log: &Logger, file: &str) -> Result<String, std::io::Error> 
     let mut file = try!(File::open(file));
     let mut content = String::new();
     try!(file.read_to_string(&mut content));
-    return Ok(content);
+    Ok(content)
   } else {
     warn!(log, "Configuration doesn't exit"; "file" => file);
     Ok("".to_string())
