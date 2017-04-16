@@ -102,8 +102,8 @@ fn main() {
     let log = log.new(o!("directory" => dir.to_string()));
     let yaml_config = &yaml_documents[0];
     info!(log, "Liftoff! Importing to configuration");
-    let dot_files = import::scan_dir(&log, &dir);
-    mutate::add_dotfiles_to_config(&log, &yaml_config, &dot_files);
+    let dot_files = import::scan_dir(&log, dir);
+    mutate::add_dotfiles_to_config(&log, yaml_config, &dot_files);
   }
 }
 
