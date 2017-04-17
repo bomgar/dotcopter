@@ -9,6 +9,7 @@ use config;
 use checksum;
 use std;
 use std::env;
+use errors::DotcopterError;
 
 pub fn process_dot_files(log: &Logger, dot_files: &Yaml, force: bool) {
   if dot_files.is_badvalue() {
@@ -70,7 +71,7 @@ fn process_copy(log: &Logger, source_path: &Path, target_path: &Path, force: boo
   }
 }
 
-fn copy_dot_file(source: &Path, target: &Path) -> Result<(), std::io::Error> {
+fn copy_dot_file(source: &Path, target: &Path) -> Result<(), DotcopterError> {
   if let Some(parent) = target.parent() {
     try!(fs::create_dir_all(parent));
   }
@@ -85,7 +86,7 @@ fn copy_dot_file(source: &Path, target: &Path) -> Result<(), std::io::Error> {
   Ok(())
 }
 
-fn has_same_content(log: &Logger, source: &Path, target: &Path) -> Result<bool, std::io::Error> {
+fn has_same_content(log: &Logger, source: &Path, target: &Path) -> Result<bool, DotcopterError> {
   if !target.exists() {
     Ok(false)
   } else if target.is_dir() || source.is_dir() {
@@ -116,7 +117,7 @@ fn process_link(log: &Logger, source_path: &Path, target_path: &Path, force: boo
   }
 }
 
-fn already_linked(source: &Path, target: &Path) -> Result<bool, std::io::Error> {
+fn already_linked(source: &Path, target: &Path) -> Result<bool, DotcopterError> {
   if target.exists() {
     let canonicalized_target = try!(fs::canonicalize(target));
     let canonicalized_source = try!(fs::canonicalize(source));
@@ -126,7 +127,7 @@ fn already_linked(source: &Path, target: &Path) -> Result<bool, std::io::Error> 
   }
 }
 
-fn link_dot_file(source: &Path, target: &Path) -> Result<(), std::io::Error> {
+fn link_dot_file(source: &Path, target: &Path) -> Result<(), DotcopterError> {
   if let Some(parent) = target.parent() {
     try!(fs::create_dir_all(parent));
   }

@@ -7,6 +7,7 @@ use std::fs::File;
 use yaml_rust::{Yaml, YamlEmitter};
 use std::error::Error;
 use std::path::Path;
+use errors::DotcopterError;
 
 #[macro_use]
 extern crate slog;
@@ -25,6 +26,7 @@ mod checksum;
 mod files;
 mod mutate;
 mod import;
+mod errors;
 
 fn main() {
   let matches: clap::ArgMatches = create_app().get_matches();
@@ -131,13 +133,13 @@ fn write_new_yaml(log: &Logger, document: &Yaml, config_file: &str) {
   };
 }
 
-fn write_config_file(file: &str, content: &str) -> Result<(), std::io::Error> {
+fn write_config_file(file: &str, content: &str) -> Result<(), DotcopterError> {
   let mut file = try!(File::create(file));
   try!(file.write_all(content.as_bytes()));
   Ok(())
 }
 
-fn load_config_file(log: &Logger, file: &str) -> Result<String, std::io::Error> {
+fn load_config_file(log: &Logger, file: &str) -> Result<String, DotcopterError> {
   let path = Path::new(file);
   if path.exists() {
     let mut file = try!(File::open(file));

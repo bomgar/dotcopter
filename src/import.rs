@@ -1,12 +1,12 @@
 use model::{DotFile, DotFileType};
 use std::path::Path;
 use std::path::PathBuf;
-use std;
 use slog::Logger;
 use std::fs;
 use std::env;
 use std::error::Error;
 use regex::Regex;
+use errors::DotcopterError;
 
 pub fn scan_dir(log: &Logger, dir: &str) -> Vec<DotFile> {
   let path = Path::new(dir);
@@ -24,7 +24,7 @@ pub fn scan_dir(log: &Logger, dir: &str) -> Vec<DotFile> {
   }
 }
 
-fn get_dot_files(log: &Logger, dir: &Path) -> Result<Vec<DotFile>, std::io::Error> {
+fn get_dot_files(log: &Logger, dir: &Path) -> Result<Vec<DotFile>, DotcopterError> {
   let current_dir = env::current_dir().expect("Expected current directory to be available");
   let links = try!(get_links(log, dir));
   let mut dot_files: Vec<DotFile> = Vec::new();
@@ -39,7 +39,7 @@ fn get_dot_files(log: &Logger, dir: &Path) -> Result<Vec<DotFile>, std::io::Erro
           if let Ok(source) = source_path.into_os_string().into_string() {
             let dot_file = DotFile {
               source: source,
-              target: replace_home_with_tilde(&log, &target),
+              target: try!(replace_home_with_tilde(&log, &target)),
               dot_file_type: DotFileType::LINK,
             };
             dot_files.push(dot_file);
@@ -55,24 +55,24 @@ fn get_dot_files(log: &Logger, dir: &Path) -> Result<Vec<DotFile>, std::io::Erro
   Ok(dot_files)
 }
 
-fn replace_home_with_tilde(log: &Logger, path: &str) -> String {
+fn replace_home_with_tilde(log: &Logger, path: &str) -> Result<String, DotcopterError> {
   if let Some(home_dir) = env::home_dir() {
     replace_path_with_tilde(path, home_dir)
   } else {
     warn!(log, "Home dir not set");
-    path.to_string()
+    Ok(path.to_string())
   }
 }
 
-fn replace_path_with_tilde(path: &str, path_to_replace: PathBuf) -> String {
+fn replace_path_with_tilde(path: &str, path_to_replace: PathBuf) -> Result<String, DotcopterError> {
   let replace_string = path_to_replace.into_os_string().into_string().expect("path should be a valid string");
   let mut pattern: String = "^".to_string();
   pattern.push_str(&replace_string);
-  let regex = Regex::new(&pattern).unwrap();
-  regex.replace_all(&path, "~").into_owned()
+  let regex = try!(Regex::new(&pattern));
+  Ok(regex.replace_all(&path, "~").into_owned())
 }
 
-fn link_target_to_relative_path(link: &Path, current_dir: &Path) -> Result<PathBuf, std::io::Error> {
+fn link_target_to_relative_path(link: &Path, current_dir: &Path) -> Result<PathBuf, DotcopterError> {
   let canonicalized_link = try!(link.canonicalize());
   Ok(canonicalized_link
        .strip_prefix(current_dir)
@@ -80,7 +80,7 @@ fn link_target_to_relative_path(link: &Path, current_dir: &Path) -> Result<PathB
        .to_path_buf())
 }
 
-fn link_points_into_dir(log: &Logger, link: &Path, dir: &Path) -> Result<bool, std::io::Error> {
+fn link_points_into_dir(log: &Logger, link: &Path, dir: &Path) -> Result<bool, DotcopterError> {
   let canonicalized_link = try!(link.canonicalize());
   debug!(log, "Check if link points to dir";
          "canonicalized_link" => format!("{}", canonicalized_link.display()),
@@ -88,7 +88,7 @@ fn link_points_into_dir(log: &Logger, link: &Path, dir: &Path) -> Result<bool, s
   Ok(canonicalized_link.starts_with(dir))
 }
 
-fn get_links(log: &Logger, path: &Path) -> Result<Vec<PathBuf>, std::io::Error> {
+fn get_links(log: &Logger, path: &Path) -> Result<Vec<PathBuf>, DotcopterError> {
   let mut symlinks: Vec<PathBuf> = Vec::new();
   let entries = try!(fs::read_dir(path));
   for dir_entry_result in entries {
@@ -114,7 +114,7 @@ mod tests {
   fn test_replace_path_with_tilde() {
     let home_dir = Path::new("/home/blubb").to_path_buf();
 
-    let replaced_string = replace_path_with_tilde("/home/blubb/moep/home/blubb/test.txt", home_dir);
+    let replaced_string = replace_path_with_tilde("/home/blubb/moep/home/blubb/test.txt", home_dir).expect("should succeed");
     assert_that(&replaced_string).is_equal_to("~/moep/home/blubb/test.txt".to_string());
 
   }
