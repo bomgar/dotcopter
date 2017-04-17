@@ -65,7 +65,10 @@ fn replace_home_with_tilde(log: &Logger, path: &str) -> Result<String, Dotcopter
 }
 
 fn replace_path_with_tilde(path: &str, path_to_replace: PathBuf) -> Result<String, DotcopterError> {
-  let replace_string = path_to_replace.into_os_string().into_string().expect("path should be a valid string");
+  let replace_string = path_to_replace
+    .into_os_string()
+    .into_string()
+    .expect("path should be a valid string");
   let mut pattern: String = "^".to_string();
   pattern.push_str(&replace_string);
   let regex = try!(Regex::new(&pattern));
@@ -74,10 +77,7 @@ fn replace_path_with_tilde(path: &str, path_to_replace: PathBuf) -> Result<Strin
 
 fn link_target_to_relative_path(link: &Path, current_dir: &Path) -> Result<PathBuf, DotcopterError> {
   let canonicalized_link = try!(link.canonicalize());
-  Ok(canonicalized_link
-       .strip_prefix(current_dir)
-       .expect("Should be checked already")
-       .to_path_buf())
+  Ok(try!(canonicalized_link.strip_prefix(current_dir)).to_path_buf())
 }
 
 fn link_points_into_dir(log: &Logger, link: &Path, dir: &Path) -> Result<bool, DotcopterError> {
