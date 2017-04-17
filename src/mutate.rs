@@ -46,7 +46,7 @@ mod tests {
 
 
   #[test]
-  fn parse_config() {
+  fn test_add_dotfile_to_config() {
     let s = "
 files:
     ~/.tmux/plugins/tpm: tpm

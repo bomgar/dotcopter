@@ -6,6 +6,7 @@ use slog::Logger;
 use std::fs;
 use std::env;
 use std::error::Error;
+use regex::Regex;
 
 pub fn scan_dir(log: &Logger, dir: &str) -> Vec<DotFile> {
   let path = Path::new(dir);
@@ -32,7 +33,7 @@ fn get_dot_files(log: &Logger, dir: &Path) -> Result<Vec<DotFile>, std::io::Erro
     if link.exists() {
       debug!(log, "Analyzing link");
       if try!(link_points_into_dir(&log, &link, &current_dir)) {
-        debug!(log, "Found dotfile");
+        info!(log, "Found dotfile");
         if let Ok(target) = link.clone().into_os_string().into_string() {
           let source_path = try!(link_target_to_relative_path(&link, &current_dir));
           if let Ok(source) = source_path.into_os_string().into_string() {
@@ -56,13 +57,19 @@ fn get_dot_files(log: &Logger, dir: &Path) -> Result<Vec<DotFile>, std::io::Erro
 
 fn replace_home_with_tilde(log: &Logger, path: &str) -> String {
   if let Some(home_dir) = env::home_dir() {
-    let home_string = home_dir.into_os_string().into_string().expect("home_dir should be a valid string");
-    //TODO regex to only replace prefix
-    path.replace(&home_string, "~")
+    replace_path_with_tilde(path, home_dir)
   } else {
     warn!(log, "Home dir not set");
     path.to_string()
   }
+}
+
+fn replace_path_with_tilde(path: &str, path_to_replace: PathBuf) -> String {
+  let replace_string = path_to_replace.into_os_string().into_string().expect("path should be a valid string");
+  let mut pattern: String = "^".to_string();
+  pattern.push_str(&replace_string);
+  let regex = Regex::new(&pattern).unwrap();
+  regex.replace_all(&path, "~").into_owned()
 }
 
 fn link_target_to_relative_path(link: &Path, current_dir: &Path) -> Result<PathBuf, std::io::Error> {
@@ -95,4 +102,20 @@ fn get_links(log: &Logger, path: &Path) -> Result<Vec<PathBuf>, std::io::Error> 
   }
   debug!(log, format!("Found {} symlinks", symlinks.len()));
   Ok(symlinks)
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use spectral::prelude::*;
+
+
+  #[test]
+  fn test_replace_path_with_tilde() {
+    let home_dir = Path::new("/home/blubb").to_path_buf();
+
+    let replaced_string = replace_path_with_tilde("/home/blubb/moep/home/blubb/test.txt", home_dir);
+    assert_that(&replaced_string).is_equal_to("~/moep/home/blubb/test.txt".to_string());
+
+  }
 }

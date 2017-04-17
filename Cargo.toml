@@ -14,6 +14,7 @@ slog-term = "1"
 slog-stdlog = "1"
 #spectral = "0.6"
 rust-crypto = "0.2"
+regex = "0.2"
 
 [dependencies.slog]
 version = "1"

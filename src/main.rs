@@ -14,6 +14,7 @@ extern crate slog_term;
 extern crate slog_stdlog;
 extern crate yaml_rust;
 extern crate crypto;
+extern crate regex;
 
 #[cfg(test)]
 extern crate spectral;
