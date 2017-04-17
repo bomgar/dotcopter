@@ -7,6 +7,7 @@ use std::fs::File;
 use yaml_rust::{Yaml, YamlEmitter};
 use std::error::Error;
 use std::path::Path;
+use std::process::exit;
 use errors::DotcopterError;
 
 #[macro_use]
@@ -47,7 +48,7 @@ fn main() {
     Ok(content) => content,
     Err(e) => {
       error!(log, "Failed to load config file."; "error" => e.description());
-      panic!(1)
+      exit(1)
     }
   };
 
@@ -55,7 +56,7 @@ fn main() {
     Ok(yaml) => yaml,
     Err(e) => {
       error!(log, "Failed to parse config file."; "error" => e.description());
-      panic!(2)
+      exit(2)
     }
   };
   if yaml_documents.is_empty() {
@@ -122,14 +123,17 @@ fn write_new_yaml(log: &Logger, document: &Yaml, config_file: &str) {
       Ok(_) => {}
       Err(e) => {
         error!(log, "Failed to write config file."; "error" => format!("{:?}", e));
-        return;
+        exit(3);
       }
     }
   }
   out_str.push_str("\n");
   match write_config_file(config_file, &out_str) {
     Ok(_) => info!(log, "Successfully written configuration"),
-    Err(e) => error!(log, "Failed to write config file."; "error" => e.description()),
+    Err(e) => {
+      error!(log, "Failed to write config file."; "error" => e.description());
+      exit(4);
+    }
   };
 }
 
