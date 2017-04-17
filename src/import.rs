@@ -25,7 +25,7 @@ pub fn scan_dir(log: &Logger, dir: &str) -> Vec<DotFile> {
 }
 
 fn get_dot_files(log: &Logger, dir: &Path) -> Result<Vec<DotFile>, DotcopterError> {
-  let current_dir = env::current_dir().expect("Expected current directory to be available");
+  let current_dir = try!(env::current_dir());
   let links = try!(get_links(log, dir));
   let mut dot_files: Vec<DotFile> = Vec::new();
   for link in links {
