@@ -11,6 +11,16 @@ pub enum DotcopterError {
   StripPrefix(path::StripPrefixError),
 }
 
+macro_rules! dotcopter_error_from {
+  ($error: ty, $dotcopter_error: ident) => {
+    impl From<$error> for DotcopterError {
+      fn from(err: $error) -> DotcopterError {
+        DotcopterError::$dotcopter_error(err)
+      }
+    }
+  }
+}
+
 impl fmt::Display for DotcopterError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     match *self {
@@ -39,20 +49,6 @@ impl error::Error for DotcopterError {
   }
 }
 
-impl From<io::Error> for DotcopterError {
-  fn from(err: io::Error) -> DotcopterError {
-    DotcopterError::IO(err)
-  }
-}
-
-impl From<regex::Error> for DotcopterError {
-  fn from(err: regex::Error) -> DotcopterError {
-    DotcopterError::Regex(err)
-  }
-}
-
-impl From<path::StripPrefixError> for DotcopterError {
-  fn from(err: path::StripPrefixError) -> DotcopterError {
-    DotcopterError::StripPrefix(err)
-  }
-}
+dotcopter_error_from!(io::Error, IO);
+dotcopter_error_from!(regex::Error, Regex);
+dotcopter_error_from!(path::StripPrefixError, StripPrefix);
