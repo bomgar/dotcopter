@@ -1,4 +1,3 @@
-extern crate clap;
 use clap::{Arg, App, AppSettings, SubCommand};
 use slog::{LevelFilter, Level, DrainExt, Logger};
 use yaml_rust::YamlLoader;
@@ -17,6 +16,8 @@ extern crate slog_stdlog;
 extern crate yaml_rust;
 extern crate crypto;
 extern crate regex;
+#[macro_use]
+extern crate clap;
 
 #[cfg(test)]
 extern crate spectral;
@@ -159,7 +160,7 @@ fn load_config_file(log: &Logger, file: &str) -> Result<String, DotcopterError> 
 
 fn create_app<'a>() -> App<'a, 'a> {
   App::new("dotcopter")
-    .version("0.1")
+    .version(crate_version!())
     .setting(AppSettings::ColoredHelp)
     .author("Patrick Haun <bomgar85@googlemail.com>")
     .about("manages dotfiles installation")
