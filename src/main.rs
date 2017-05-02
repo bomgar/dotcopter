@@ -164,6 +164,7 @@ fn create_app<'a>() -> App<'a, 'a> {
     .setting(AppSettings::ColoredHelp)
     .author("Patrick Haun <bomgar85@googlemail.com>")
     .about("manages dotfiles installation")
+    .setting(AppSettings::SubcommandRequired)
     .arg(Arg::with_name("force")
            .short("f")
            .long("force")
