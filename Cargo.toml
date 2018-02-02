@@ -11,7 +11,6 @@ license = "Apache-2.0"
 [dependencies]
 clap = "2.29"
 slog-term = "2"
-slog-stdlog = "2"
 slog-async = "2"
 rust-crypto = "0.2"
 regex = "0.2"

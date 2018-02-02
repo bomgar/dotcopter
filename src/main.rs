@@ -12,7 +12,6 @@ use errors::DotcopterError;
 #[macro_use]
 extern crate slog;
 extern crate slog_term;
-extern crate slog_stdlog;
 extern crate slog_async;
 extern crate yaml_rust;
 extern crate crypto;
@@ -45,7 +44,7 @@ fn _main() -> i32 {
     .use_original_order()
     .build()
     .fuse();
-  let drain = slog_async::Async::new(drain).chan_size(10000).build().fuse();
+  let drain = slog_async::Async::new(drain).chan_size(10_000).build().fuse();
   let log = if verbose {
     slog::Logger::root(drain, o!())
   } else {
@@ -124,7 +123,7 @@ fn _main() -> i32 {
       return write_new_yaml(&log, &new_config, config_file);
     }
   }
-  return 0;
+  0
 }
 
 
@@ -148,7 +147,7 @@ fn write_new_yaml(log: &Logger, document: &Yaml, config_file: &str) -> i32 {
       return 4;
     }
   };
-  return 0;
+  0
 }
 
 fn write_config_file(file: &str, content: &str) -> Result<(), DotcopterError> {

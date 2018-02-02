@@ -59,9 +59,6 @@ fn dot_file_type_from_string(log: &Logger, s: &str) -> DotFileType {
 
 #[cfg(test)]
 mod tests {
-  use slog;
-  use slog_stdlog;
-  use slog::Drain;
   use yaml_rust::YamlLoader;
   use yaml_rust::Yaml;
   use super::*;
@@ -83,7 +80,7 @@ files:
     let yaml_documents = YamlLoader::load_from_str(s).unwrap();
     let yaml_config = &yaml_documents[0];
     let dot_files: &Yaml = &yaml_config["files"];
-    let logger = slog::Logger::root(slog_stdlog::StdLog.fuse(), o!());
+    let logger = a_logger();
     let parsed_dot_files: Vec<DotFile> = parse_dot_files(&logger, dot_files);
 
     assert_that(&parsed_dot_files).has_length(3);
@@ -102,5 +99,14 @@ files:
                                                target: "~/.vimrc".to_string(),
                                                dot_file_type: DotFileType::LINK,
                                              });
+  }
+
+  fn a_logger() -> Logger {
+    use slog::Drain;
+    use slog_term;
+    use std;
+    let plain = slog_term::PlainSyncDecorator::new(std::io::stdout());
+    let drain = slog_term::FullFormat::new(plain).build().fuse();
+    Logger::root(drain, o!())
   }
 }

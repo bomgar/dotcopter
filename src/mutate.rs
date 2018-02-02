@@ -35,15 +35,20 @@ fn add_dotfiles_to_files(files: &Yaml, dotfiles: &[model::DotFile]) -> Yaml {
 }
 #[cfg(test)]
 mod tests {
-  use slog;
-  use slog_stdlog;
-  use slog::Drain;
   use yaml_rust::YamlLoader;
   use yaml_rust::{Yaml, YamlEmitter};
   use super::*;
   use spectral::prelude::*;
   use model::{DotFile, DotFileType};
 
+  fn a_logger() -> Logger {
+    use slog::Drain;
+    use slog_term;
+    use std;
+    let plain = slog_term::PlainSyncDecorator::new(std::io::stdout());
+    let drain = slog_term::FullFormat::new(plain).build().fuse();
+    Logger::root(drain, o!())
+  }
 
   #[test]
   fn test_add_dotfile_to_config() {
@@ -59,7 +64,7 @@ files:
 ";
     let yaml_documents = YamlLoader::load_from_str(s).unwrap();
     let yaml_config = &yaml_documents[0];
-    let logger = slog::Logger::root(slog_stdlog::StdLog.fuse(), o!());
+    let logger = a_logger();
     let new_files = [DotFile {
                        source: "test".to_string(),
                        target: "~/test".to_string(),

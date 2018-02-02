@@ -11,7 +11,7 @@ use errors::DotcopterError;
 pub fn scan_dir(log: &Logger, dir: &str) -> Vec<DotFile> {
   let path = Path::new(dir);
   if path.is_dir() {
-    match get_dot_files(log, &path) {
+    match get_dot_files(log, path) {
       Ok(links) => links,
       Err(e) => {
         error!(log, "Failed to get symlinks"; "error" => e.description());
@@ -72,7 +72,7 @@ fn replace_path_with_tilde(path: &str, path_to_replace: PathBuf) -> Result<Strin
   let mut pattern: String = "^".to_string();
   pattern.push_str(&replace_string);
   let regex = try!(Regex::new(&pattern));
-  Ok(regex.replace_all(&path, "~").into_owned())
+  Ok(regex.replace_all(path, "~").into_owned())
 }
 
 fn link_target_to_relative_path(link: &Path, current_dir: &Path) -> Result<PathBuf, DotcopterError> {
