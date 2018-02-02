@@ -61,7 +61,7 @@ fn dot_file_type_from_string(log: &Logger, s: &str) -> DotFileType {
 mod tests {
   use slog;
   use slog_stdlog;
-  use slog::DrainExt;
+  use slog::Drain;
   use yaml_rust::YamlLoader;
   use yaml_rust::Yaml;
   use super::*;

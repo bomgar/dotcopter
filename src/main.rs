@@ -1,5 +1,5 @@
 use clap::{Arg, App, AppSettings, SubCommand};
-use slog::{LevelFilter, Level, DrainExt, Logger};
+use slog::{LevelFilter, Level, Drain, Logger};
 use yaml_rust::YamlLoader;
 use std::io::prelude::*;
 use std::fs::File;
@@ -13,6 +13,7 @@ use errors::DotcopterError;
 extern crate slog;
 extern crate slog_term;
 extern crate slog_stdlog;
+extern crate slog_async;
 extern crate yaml_rust;
 extern crate crypto;
 extern crate regex;
@@ -31,14 +32,24 @@ mod import;
 mod errors;
 
 fn main() {
+  let return_code = _main();
+  exit(return_code);
+}
+fn _main() -> i32 {
   let matches: clap::ArgMatches = create_app().get_matches();
-  let stream = slog_term::streamer().full().build();
   let verbose: bool = matches.is_present("verbose");
   let force: bool = matches.is_present("force");
+
+  let decorator = slog_term::TermDecorator::new().build();
+  let drain = slog_term::FullFormat::new(decorator)
+    .use_original_order()
+    .build()
+    .fuse();
+  let drain = slog_async::Async::new(drain).chan_size(10000).build().fuse();
   let log = if verbose {
-    slog::Logger::root(stream.fuse(), o!())
+    slog::Logger::root(drain, o!())
   } else {
-    slog::Logger::root(LevelFilter::new(stream, Level::Info).fuse(), o!())
+    slog::Logger::root(LevelFilter::new(drain, Level::Info).fuse(), o!())
   };
 
 
@@ -49,7 +60,7 @@ fn main() {
     Ok(content) => content,
     Err(e) => {
       error!(log, "Failed to load config file."; "error" => e.description());
-      exit(1)
+      return 1;
     }
   };
 
@@ -57,7 +68,7 @@ fn main() {
     Ok(yaml) => yaml,
     Err(e) => {
       error!(log, "Failed to parse config file."; "error" => e.description());
-      exit(2)
+      return 2;
     }
   };
   if yaml_documents.is_empty() {
@@ -87,7 +98,7 @@ fn main() {
                                                         source: link_target.to_string(),
                                                         dot_file_type: model::DotFileType::LINK,
                                                       }]);
-    write_new_yaml(&log, &new_config, config_file);
+    return write_new_yaml(&log, &new_config, config_file);
   } else if let Some(cp_matches) = maybe_cp_matches {
     let yaml_config = &yaml_documents[0];
     let target = cp_matches.value_of("target").unwrap();
@@ -101,7 +112,7 @@ fn main() {
                                                         source: source.to_string(),
                                                         dot_file_type: model::DotFileType::COPY,
                                                       }]);
-    write_new_yaml(&log, &new_config, config_file);
+    return write_new_yaml(&log, &new_config, config_file);
   } else if let Some(import_matches) = maybe_import_matches {
     let dir = import_matches.value_of("dir").unwrap();
     let log = log.new(o!("import_directory" => dir.to_string()));
@@ -110,13 +121,14 @@ fn main() {
     let dot_files = import::scan_dir(&log, dir);
     if !dot_files.is_empty() {
       let new_config = mutate::add_dotfiles_to_config(&log, yaml_config, &dot_files);
-      write_new_yaml(&log, &new_config, config_file);
+      return write_new_yaml(&log, &new_config, config_file);
     }
   }
+  return 0;
 }
 
 
-fn write_new_yaml(log: &Logger, document: &Yaml, config_file: &str) {
+fn write_new_yaml(log: &Logger, document: &Yaml, config_file: &str) -> i32 {
   let mut out_str = String::new();
   {
     let mut emitter = YamlEmitter::new(&mut out_str);
@@ -124,7 +136,7 @@ fn write_new_yaml(log: &Logger, document: &Yaml, config_file: &str) {
       Ok(_) => {}
       Err(e) => {
         error!(log, "Failed to write config file."; "error" => format!("{:?}", e));
-        exit(3);
+        return 3;
       }
     }
   }
@@ -133,9 +145,10 @@ fn write_new_yaml(log: &Logger, document: &Yaml, config_file: &str) {
     Ok(_) => info!(log, "Successfully written configuration"),
     Err(e) => {
       error!(log, "Failed to write config file."; "error" => e.description());
-      exit(4);
+      return 4;
     }
   };
+  return 0;
 }
 
 fn write_config_file(file: &str, content: &str) -> Result<(), DotcopterError> {

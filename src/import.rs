@@ -100,7 +100,7 @@ fn get_links(log: &Logger, path: &Path) -> Result<Vec<PathBuf>, DotcopterError> 
       symlinks.push(entry_path.to_path_buf());
     }
   }
-  debug!(log, format!("Found {} symlinks", symlinks.len()));
+  debug!(log, "Found symlinks"; "count" => symlinks.len());
   Ok(symlinks)
 }
 

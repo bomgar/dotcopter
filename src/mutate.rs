@@ -37,7 +37,7 @@ fn add_dotfiles_to_files(files: &Yaml, dotfiles: &[model::DotFile]) -> Yaml {
 mod tests {
   use slog;
   use slog_stdlog;
-  use slog::DrainExt;
+  use slog::Drain;
   use yaml_rust::YamlLoader;
   use yaml_rust::{Yaml, YamlEmitter};
   use super::*;

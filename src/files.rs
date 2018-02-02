@@ -94,7 +94,7 @@ fn has_same_content(log: &Logger, source: &Path, target: &Path) -> Result<bool, 
   } else {
     let source_hash = try!(checksum::hash(source));
     let target_hash = try!(checksum::hash(target));
-    debug!(log, "Hashed files"; "target_hash" => target_hash, "source_hash" => source_hash);
+    debug!(log, "Hashed files"; "target_hash" => &target_hash, "source_hash" => &source_hash);
     Ok(source_hash == target_hash)
   }
 }
