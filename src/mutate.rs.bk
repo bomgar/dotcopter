@@ -78,18 +78,17 @@ files:
     }
 
     let expected = "---
-files:
+files: 
   ~/.tmux/plugins/tpm: tpm
-  ~/.tmux.conf:
+  ~/.tmux.conf: 
     src: tmux.conf
     type: copy
-  ~/.vimrc:
+  ~/.vimrc: 
     src: vimrc
     type: link
-  ~/test:
+  ~/test: 
     src: test
-    type: LINK"
-        .to_string();
+    type: LINK".to_string();
 
     assert_that(&out_str).is_equal_to(expected);
   }

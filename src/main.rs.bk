@@ -44,10 +44,7 @@ fn _main() -> i32 {
     .use_original_order()
     .build()
     .fuse();
-  let drain = slog_async::Async::new(drain)
-    .chan_size(10_000)
-    .build()
-    .fuse();
+  let drain = slog_async::Async::new(drain).chan_size(10_000).build().fuse();
   let log = if verbose {
     slog::Logger::root(drain, o!())
   } else {
@@ -96,10 +93,10 @@ fn _main() -> i32 {
     let new_config = mutate::add_dotfiles_to_config(&log,
                                                     yaml_config,
                                                     &[model::DotFile {
-                                                       target: link_name.to_string(),
-                                                       source: link_target.to_string(),
-                                                       dot_file_type: model::DotFileType::LINK,
-                                                     }]);
+                                                        target: link_name.to_string(),
+                                                        source: link_target.to_string(),
+                                                        dot_file_type: model::DotFileType::LINK,
+                                                      }]);
     return write_new_yaml(&log, &new_config, config_file);
   } else if let Some(cp_matches) = maybe_cp_matches {
     let yaml_config = &yaml_documents[0];
@@ -110,10 +107,10 @@ fn _main() -> i32 {
     let new_config = mutate::add_dotfiles_to_config(&log,
                                                     yaml_config,
                                                     &[model::DotFile {
-                                                       target: target.to_string(),
-                                                       source: source.to_string(),
-                                                       dot_file_type: model::DotFileType::COPY,
-                                                     }]);
+                                                        target: target.to_string(),
+                                                        source: source.to_string(),
+                                                        dot_file_type: model::DotFileType::COPY,
+                                                      }]);
     return write_new_yaml(&log, &new_config, config_file);
   } else if let Some(import_matches) = maybe_import_matches {
     let dir = import_matches.value_of("dir").unwrap();
