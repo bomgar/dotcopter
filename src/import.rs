@@ -109,13 +109,11 @@ mod tests {
   use super::*;
   use spectral::prelude::*;
 
-
   #[test]
   fn test_replace_path_with_tilde() {
     let home_dir = Path::new("/home/blubb").to_path_buf();
 
     let replaced_string = replace_path_with_tilde("/home/blubb/moep/home/blubb/test.txt", home_dir).expect("should succeed");
     assert_that(&replaced_string).is_equal_to("~/moep/home/blubb/test.txt".to_string());
-
   }
 }

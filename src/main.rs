@@ -1,5 +1,5 @@
-use clap::{Arg, App, AppSettings, SubCommand};
-use slog::{LevelFilter, Level, Drain, Logger};
+use clap::{App, AppSettings, Arg, SubCommand};
+use slog::{Drain, Level, LevelFilter, Logger};
 use yaml_rust::YamlLoader;
 use std::io::prelude::*;
 use std::fs::File;
@@ -10,14 +10,14 @@ use std::process::exit;
 use errors::DotcopterError;
 
 #[macro_use]
-extern crate slog;
-extern crate slog_term;
-extern crate slog_async;
-extern crate yaml_rust;
+extern crate clap;
 extern crate crypto;
 extern crate regex;
 #[macro_use]
-extern crate clap;
+extern crate slog;
+extern crate slog_async;
+extern crate slog_term;
+extern crate yaml_rust;
 
 #[cfg(test)]
 extern crate spectral;
@@ -53,7 +53,6 @@ fn _main() -> i32 {
   } else {
     slog::Logger::root(LevelFilter::new(drain, Level::Info).fuse(), o!())
   };
-
 
   let config_file = matches.value_of("config_file").unwrap();
   info!(log, "Starting engine"; "config_file" => config_file);
@@ -93,13 +92,17 @@ fn _main() -> i32 {
     let link_name = ln_matches.value_of("link_name").unwrap();
     let log = log.new(o!("link_target" => link_target.to_string(), "link_name" => link_name.to_string()));
     info!(log, "Liftoff! Adding new link to configuration");
-    let new_config = mutate::add_dotfiles_to_config(&log,
-                                                    yaml_config,
-                                                    &[model::DotFile {
-                                                       target: link_name.to_string(),
-                                                       source: link_target.to_string(),
-                                                       dot_file_type: model::DotFileType::LINK,
-                                                     }]);
+    let new_config = mutate::add_dotfiles_to_config(
+      &log,
+      yaml_config,
+      &[
+        model::DotFile {
+          target: link_name.to_string(),
+          source: link_target.to_string(),
+          dot_file_type: model::DotFileType::LINK,
+        },
+      ],
+    );
     return write_new_yaml(&log, &new_config, config_file);
   } else if let Some(cp_matches) = maybe_cp_matches {
     let yaml_config = &yaml_documents[0];
@@ -107,13 +110,17 @@ fn _main() -> i32 {
     let source = cp_matches.value_of("source").unwrap();
     let log = log.new(o!("target" => target.to_string(), "source" => source.to_string()));
     info!(log, "Liftoff! Adding new copy to configuration");
-    let new_config = mutate::add_dotfiles_to_config(&log,
-                                                    yaml_config,
-                                                    &[model::DotFile {
-                                                       target: target.to_string(),
-                                                       source: source.to_string(),
-                                                       dot_file_type: model::DotFileType::COPY,
-                                                     }]);
+    let new_config = mutate::add_dotfiles_to_config(
+      &log,
+      yaml_config,
+      &[
+        model::DotFile {
+          target: target.to_string(),
+          source: source.to_string(),
+          dot_file_type: model::DotFileType::COPY,
+        },
+      ],
+    );
     return write_new_yaml(&log, &new_config, config_file);
   } else if let Some(import_matches) = maybe_import_matches {
     let dir = import_matches.value_of("dir").unwrap();
@@ -128,7 +135,6 @@ fn _main() -> i32 {
   }
   0
 }
-
 
 fn write_new_yaml(log: &Logger, document: &Yaml, config_file: &str) -> i32 {
   let mut out_str = String::new();
@@ -172,7 +178,6 @@ fn load_config_file(log: &Logger, file: &str) -> Result<String, DotcopterError> 
   }
 }
 
-
 fn create_app<'a>() -> App<'a, 'a> {
   App::new("dotcopter")
     .version(crate_version!())
@@ -180,27 +185,37 @@ fn create_app<'a>() -> App<'a, 'a> {
     .author("Patrick Haun <bomgar85@googlemail.com>")
     .about("manages dotfiles installation")
     .setting(AppSettings::SubcommandRequired)
-    .arg(Arg::with_name("force")
-           .short("f")
-           .long("force")
-           .takes_value(false))
-    .arg(Arg::with_name("verbose")
-           .long("verbose")
-           .short("v")
-           .help("debug output")
-           .required(false)
-           .takes_value(false))
+    .arg(
+      Arg::with_name("force")
+        .short("f")
+        .long("force")
+        .takes_value(false),
+    )
+    .arg(
+      Arg::with_name("verbose")
+        .long("verbose")
+        .short("v")
+        .help("debug output")
+        .required(false)
+        .takes_value(false),
+    )
     .arg(Arg::with_name("config_file").required(true))
     .subcommand(SubCommand::with_name("apply").about("applies a dotfile configuration"))
-    .subcommand(SubCommand::with_name("ln")
-                  .about("adds new link to configuration")
-                  .arg(Arg::with_name("link_target").required(true))
-                  .arg(Arg::with_name("link_name").required(true)))
-    .subcommand(SubCommand::with_name("cp")
-                  .about("adds new copy to configuration")
-                  .arg(Arg::with_name("source").required(true))
-                  .arg(Arg::with_name("target").required(true)))
-    .subcommand(SubCommand::with_name("import")
-                  .about("imports dotfiles from a folder into the configuration")
-                  .arg(Arg::with_name("dir").required(true)))
+    .subcommand(
+      SubCommand::with_name("ln")
+        .about("adds new link to configuration")
+        .arg(Arg::with_name("link_target").required(true))
+        .arg(Arg::with_name("link_name").required(true)),
+    )
+    .subcommand(
+      SubCommand::with_name("cp")
+        .about("adds new copy to configuration")
+        .arg(Arg::with_name("source").required(true))
+        .arg(Arg::with_name("target").required(true)),
+    )
+    .subcommand(
+      SubCommand::with_name("import")
+        .about("imports dotfiles from a folder into the configuration")
+        .arg(Arg::with_name("dir").required(true)),
+    )
 }

@@ -1,4 +1,3 @@
-
 use slog::Logger;
 use yaml_rust::yaml;
 use yaml_rust::Yaml;
@@ -24,12 +23,18 @@ fn add_dotfiles_to_files(files: &Yaml, dotfiles: &[model::DotFile]) -> Yaml {
   };
   for dotfile in dotfiles {
     let mut prop_hash = yaml::Hash::new();
-    prop_hash.insert(Yaml::String("src".to_string()),
-                     Yaml::String(dotfile.source.to_string()));
-    prop_hash.insert(Yaml::String("type".to_string()),
-                     Yaml::String(format!("{:?}", dotfile.dot_file_type)));
-    new_hash.insert(Yaml::String(dotfile.target.to_string()),
-                    Yaml::Hash(prop_hash));
+    prop_hash.insert(
+      Yaml::String("src".to_string()),
+      Yaml::String(dotfile.source.to_string()),
+    );
+    prop_hash.insert(
+      Yaml::String("type".to_string()),
+      Yaml::String(format!("{:?}", dotfile.dot_file_type)),
+    );
+    new_hash.insert(
+      Yaml::String(dotfile.target.to_string()),
+      Yaml::Hash(prop_hash),
+    );
   }
   Yaml::Hash(new_hash)
 }
@@ -65,11 +70,13 @@ files:
     let yaml_documents = YamlLoader::load_from_str(s).unwrap();
     let yaml_config = &yaml_documents[0];
     let logger = a_logger();
-    let new_files = [DotFile {
-                       source: "test".to_string(),
-                       target: "~/test".to_string(),
-                       dot_file_type: DotFileType::LINK,
-                     }];
+    let new_files = [
+      DotFile {
+        source: "test".to_string(),
+        target: "~/test".to_string(),
+        dot_file_type: DotFileType::LINK,
+      },
+    ];
     let new_config: Yaml = add_dotfiles_to_config(&logger, &yaml_config, &new_files);
     let mut out_str = String::new();
     {
@@ -89,7 +96,7 @@ files:
   ~/test:
     src: test
     type: LINK"
-        .to_string();
+      .to_string();
 
     assert_that(&out_str).is_equal_to(expected);
   }

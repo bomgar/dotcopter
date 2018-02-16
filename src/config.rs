@@ -9,16 +9,16 @@ pub fn parse_dot_files(log: &Logger, dot_files: &Yaml) -> Vec<DotFile> {
   if let Yaml::Hash(entries) = dot_files.clone() {
     for (key, value) in entries {
       match (key, value) {
-        (Yaml::String(target), Yaml::String(source)) => {
-          parsed_dot_files.push(DotFile {
-                                  source: source.to_string(),
-                                  target: target.to_string(),
-                                  dot_file_type: DotFileType::LINK,
-                                })
-        }
-        (Yaml::String(target), Yaml::Hash(settings)) => {
-          parsed_dot_files.push(dot_file_from_settings(&log.new(o!("target" => target.clone())), &target, &settings))
-        }
+        (Yaml::String(target), Yaml::String(source)) => parsed_dot_files.push(DotFile {
+          source: source.to_string(),
+          target: target.to_string(),
+          dot_file_type: DotFileType::LINK,
+        }),
+        (Yaml::String(target), Yaml::Hash(settings)) => parsed_dot_files.push(dot_file_from_settings(
+          &log.new(o!("target" => target.clone())),
+          &target,
+          &settings,
+        )),
         _ => {}
       }
     }
@@ -64,7 +64,6 @@ mod tests {
   use super::*;
   use spectral::prelude::*;
 
-
   #[test]
   fn parse_config() {
     let s = "
@@ -85,20 +84,20 @@ files:
 
     assert_that(&parsed_dot_files).has_length(3);
     assert_that(&parsed_dot_files).contains(&DotFile {
-                                              source: "tpm".to_string(),
-                                              target: "~/.tmux/plugins/tpm".to_string(),
-                                              dot_file_type: DotFileType::LINK,
-                                            });
+      source: "tpm".to_string(),
+      target: "~/.tmux/plugins/tpm".to_string(),
+      dot_file_type: DotFileType::LINK,
+    });
     assert_that(&parsed_dot_files).contains(&DotFile {
-                                              source: "tmux.conf".to_string(),
-                                              target: "~/.tmux.conf".to_string(),
-                                              dot_file_type: DotFileType::COPY,
-                                            });
+      source: "tmux.conf".to_string(),
+      target: "~/.tmux.conf".to_string(),
+      dot_file_type: DotFileType::COPY,
+    });
     assert_that(&parsed_dot_files).contains(&DotFile {
-                                              source: "vimrc".to_string(),
-                                              target: "~/.vimrc".to_string(),
-                                              dot_file_type: DotFileType::LINK,
-                                            });
+      source: "vimrc".to_string(),
+      target: "~/.vimrc".to_string(),
+      dot_file_type: DotFileType::LINK,
+    });
   }
 
   fn a_logger() -> Logger {

@@ -1,4 +1,3 @@
-
 use slog::Logger;
 use yaml_rust::Yaml;
 use model::*;
@@ -20,7 +19,6 @@ pub fn process_dot_files(log: &Logger, dot_files: &Yaml, force: bool) {
     }
   }
 }
-
 
 fn process_dot_file(log: &Logger, dot_file: &DotFile, force: bool) {
   let log = &log.new(o!("target" => dot_file.target.clone(), "source" => dot_file.source.clone(), "type" => format!("{:?}", dot_file.dot_file_type)));
