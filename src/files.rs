@@ -6,8 +6,8 @@ use std::fs;
 use std::error::Error;
 use config;
 use checksum;
+use dirs;
 use std;
-use std::env;
 use errors::DotcopterError;
 
 pub fn process_dot_files(log: &Logger, dot_files: &Yaml, force: bool) {
@@ -38,7 +38,7 @@ fn process_dot_file(log: &Logger, dot_file: &DotFile, force: bool) {
 }
 
 fn resolve_home(log: &Logger, path: &str) -> String {
-  if let Some(home_dir) = env::home_dir() {
+  if let Some(home_dir) = dirs::home_dir() {
     if path.starts_with('~') {
       let mut home_string = home_dir
         .into_os_string()
@@ -87,6 +87,7 @@ fn copy_dot_file(source: &Path, target: &Path) -> Result<(), DotcopterError> {
   Ok(())
 }
 
+#[cfg_attr(feature = "cargo-clippy", allow(if_same_then_else))]
 fn has_same_content(log: &Logger, source: &Path, target: &Path) -> Result<bool, DotcopterError> {
   if !target.exists() {
     Ok(false)

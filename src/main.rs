@@ -22,6 +22,8 @@ extern crate yaml_rust;
 #[cfg(test)]
 extern crate spectral;
 
+extern crate dirs;
+
 mod model;
 mod config;
 mod checksum;

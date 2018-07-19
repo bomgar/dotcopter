@@ -1,4 +1,5 @@
 use model::{DotFile, DotFileType};
+use dirs;
 use std::path::Path;
 use std::path::PathBuf;
 use slog::Logger;
@@ -38,7 +39,7 @@ fn get_dot_files(log: &Logger, dir: &Path) -> Result<Vec<DotFile>, DotcopterErro
           let source_path = try!(link_target_to_relative_path(&link, &current_dir));
           if let Ok(source) = source_path.into_os_string().into_string() {
             let dot_file = DotFile {
-              source: source,
+              source,
               target: try!(replace_home_with_tilde(&log, &target)),
               dot_file_type: DotFileType::LINK,
             };
@@ -56,7 +57,7 @@ fn get_dot_files(log: &Logger, dir: &Path) -> Result<Vec<DotFile>, DotcopterErro
 }
 
 fn replace_home_with_tilde(log: &Logger, path: &str) -> Result<String, DotcopterError> {
-  if let Some(home_dir) = env::home_dir() {
+  if let Some(home_dir) = dirs::home_dir() {
     replace_path_with_tilde(path, home_dir)
   } else {
     warn!(log, "Home dir not set");
