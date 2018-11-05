@@ -8,6 +8,7 @@ use std::env;
 use std::error::Error;
 use regex::Regex;
 use errors::DotcopterError;
+use slog::{error, debug, o, warn, info};
 
 pub fn scan_dir(log: &Logger, dir: &str) -> Vec<DotFile> {
   let path = Path::new(dir);

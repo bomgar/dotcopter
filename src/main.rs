@@ -9,11 +9,9 @@ use std::path::Path;
 use std::process::exit;
 use errors::DotcopterError;
 
-#[macro_use]
 extern crate clap;
 extern crate crypto;
 extern crate regex;
-#[macro_use]
 extern crate slog;
 extern crate slog_async;
 extern crate slog_term;
@@ -23,6 +21,9 @@ extern crate yaml_rust;
 extern crate spectral;
 
 extern crate dirs;
+
+use clap::crate_version;
+use slog::{error, o, info, warn};
 
 mod model;
 mod config;

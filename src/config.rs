@@ -2,6 +2,7 @@ use yaml_rust;
 use slog::Logger;
 use yaml_rust::Yaml;
 use model::*;
+use slog::{o, info, warn };
 
 pub fn parse_dot_files(log: &Logger, dot_files: &Yaml) -> Vec<DotFile> {
   let mut parsed_dot_files = Vec::new();

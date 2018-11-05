@@ -2,6 +2,7 @@ use slog::Logger;
 use yaml_rust::yaml;
 use yaml_rust::Yaml;
 use model;
+use slog::{warn};
 
 pub fn add_dotfiles_to_config(log: &Logger, config: &Yaml, dotfiles: &[model::DotFile]) -> Yaml {
   let mut new_hash = if let Yaml::Hash(config_hash) = config.clone() {
@@ -45,6 +46,7 @@ mod tests {
   use super::*;
   use spectral::prelude::*;
   use model::{DotFile, DotFileType};
+  use slog::{o};
 
   fn a_logger() -> Logger {
     use slog::Drain;

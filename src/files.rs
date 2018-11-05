@@ -9,6 +9,7 @@ use checksum;
 use dirs;
 use std;
 use errors::DotcopterError;
+use slog::{error, o, info, warn, debug};
 
 pub fn process_dot_files(log: &Logger, dot_files: &Yaml, force: bool) {
   if dot_files.is_badvalue() {
