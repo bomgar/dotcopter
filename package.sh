@@ -2,7 +2,7 @@
 set -x -e -o pipefail
 
 rm -rf target
-docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:1.27.0 cargo build --release
+docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:1.30.0 cargo build --release
 name=dotcopter
 target_dir="target/x86_64-unknown-linux-musl/release"
 
