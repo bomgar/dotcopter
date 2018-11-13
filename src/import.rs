@@ -27,21 +27,21 @@ pub fn scan_dir(log: &Logger, dir: &str) -> Vec<DotFile> {
 }
 
 fn get_dot_files(log: &Logger, dir: &Path) -> Result<Vec<DotFile>, DotcopterError> {
-  let current_dir = try!(env::current_dir());
-  let links = try!(get_links(log, dir));
+  let current_dir = env::current_dir()?;
+  let links = get_links(log, dir)?;
   let mut dot_files: Vec<DotFile> = Vec::new();
   for link in links {
     let log = log.new(o!("link" => format!("{}", link.display())));
     if link.exists() {
       debug!(log, "Analyzing link");
-      if try!(link_points_into_dir(&log, &link, &current_dir)) {
+      if link_points_into_dir(&log, &link, &current_dir)? {
         info!(log, "Found dotfile");
         if let Ok(target) = link.clone().into_os_string().into_string() {
-          let source_path = try!(link_target_to_relative_path(&link, &current_dir));
+          let source_path = link_target_to_relative_path(&link, &current_dir)?;
           if let Ok(source) = source_path.into_os_string().into_string() {
             let dot_file = DotFile {
               source,
-              target: try!(replace_home_with_tilde(&log, &target)),
+              target: replace_home_with_tilde(&log, &target)?,
               dot_file_type: DotFileType::LINK,
             };
             dot_files.push(dot_file);
@@ -73,17 +73,17 @@ fn replace_path_with_tilde(path: &str, path_to_replace: PathBuf) -> Result<Strin
     .expect("path should be a valid string");
   let mut pattern: String = "^".to_string();
   pattern.push_str(&replace_string);
-  let regex = try!(Regex::new(&pattern));
+  let regex = Regex::new(&pattern)?;
   Ok(regex.replace_all(path, "~").into_owned())
 }
 
 fn link_target_to_relative_path(link: &Path, current_dir: &Path) -> Result<PathBuf, DotcopterError> {
-  let canonicalized_link = try!(link.canonicalize());
-  Ok(try!(canonicalized_link.strip_prefix(current_dir)).to_path_buf())
+  let canonicalized_link = link.canonicalize()?;
+  Ok(canonicalized_link.strip_prefix(current_dir)?.to_path_buf())
 }
 
 fn link_points_into_dir(log: &Logger, link: &Path, dir: &Path) -> Result<bool, DotcopterError> {
-  let canonicalized_link = try!(link.canonicalize());
+  let canonicalized_link = link.canonicalize()?;
   debug!(log, "Check if link points to dir";
          "canonicalized_link" => format!("{}", canonicalized_link.display()),
          "dir_to_check" => format!("{}", dir.display()));
@@ -92,12 +92,12 @@ fn link_points_into_dir(log: &Logger, link: &Path, dir: &Path) -> Result<bool, D
 
 fn get_links(log: &Logger, path: &Path) -> Result<Vec<PathBuf>, DotcopterError> {
   let mut symlinks: Vec<PathBuf> = Vec::new();
-  let entries = try!(fs::read_dir(path));
+  let entries = fs::read_dir(path)?;
   for dir_entry_result in entries {
-    let dir_entry: fs::DirEntry = try!(dir_entry_result);
+    let dir_entry: fs::DirEntry = dir_entry_result?;
     let entry_path = dir_entry.path();
     debug!(log, "Analyzing"; "dir_entry" => format!("{}", entry_path.display()));
-    let metadata: fs::Metadata = try!(entry_path.symlink_metadata());
+    let metadata: fs::Metadata = entry_path.symlink_metadata()?;
     if metadata.file_type().is_symlink() {
       symlinks.push(entry_path.to_path_buf());
     }

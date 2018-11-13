@@ -163,17 +163,17 @@ fn write_new_yaml(log: &Logger, document: &Yaml, config_file: &str) -> i32 {
 }
 
 fn write_config_file(file: &str, content: &str) -> Result<(), DotcopterError> {
-  let mut file = try!(File::create(file));
-  try!(file.write_all(content.as_bytes()));
+  let mut file = File::create(file)?;
+  file.write_all(content.as_bytes())?;
   Ok(())
 }
 
 fn load_config_file(log: &Logger, file: &str) -> Result<String, DotcopterError> {
   let path = Path::new(file);
   if path.exists() {
-    let mut file = try!(File::open(file));
+    let mut file = File::open(file)?;
     let mut content = String::new();
-    try!(file.read_to_string(&mut content));
+    file.read_to_string(&mut content)?;
     Ok(content)
   } else {
     warn!(log, "Configuration doesn't exit"; "file" => file);

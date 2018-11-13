@@ -75,16 +75,16 @@ fn process_copy(log: &Logger, source_path: &Path, target_path: &Path, force: boo
 
 fn copy_dot_file(source: &Path, target: &Path) -> Result<(), DotcopterError> {
   if let Some(parent) = target.parent() {
-    try!(fs::create_dir_all(parent));
+    fs::create_dir_all(parent)?;
   }
   if target.exists() {
     if target.is_file() {
-      try!(fs::remove_file(target))
+      fs::remove_file(target)?
     } else if target.is_dir() {
-      try!(fs::remove_dir_all(target))
+      fs::remove_dir_all(target)?
     }
   }
-  try!(fs::copy(source, target));
+  fs::copy(source, target)?;
   Ok(())
 }
 
@@ -95,8 +95,8 @@ fn has_same_content(log: &Logger, source: &Path, target: &Path) -> Result<bool, 
   } else if target.is_dir() || source.is_dir() {
     Ok(false) //TODO: ???
   } else {
-    let source_hash = try!(checksum::hash(source));
-    let target_hash = try!(checksum::hash(target));
+    let source_hash = checksum::hash(source)?;
+    let target_hash = checksum::hash(target)?;
     debug!(log, "Hashed files"; "target_hash" => &target_hash, "source_hash" => &source_hash);
     Ok(source_hash == target_hash)
   }
@@ -122,8 +122,8 @@ fn process_link(log: &Logger, source_path: &Path, target_path: &Path, force: boo
 
 fn already_linked(source: &Path, target: &Path) -> Result<bool, DotcopterError> {
   if target.exists() {
-    let canonicalized_target = try!(fs::canonicalize(target));
-    let canonicalized_source = try!(fs::canonicalize(source));
+    let canonicalized_target = fs::canonicalize(target)?;
+    let canonicalized_source = fs::canonicalize(source)?;
     Ok(canonicalized_source == canonicalized_target)
   } else {
     Ok(false)
@@ -132,16 +132,16 @@ fn already_linked(source: &Path, target: &Path) -> Result<bool, DotcopterError> 
 
 fn link_dot_file(source: &Path, target: &Path) -> Result<(), DotcopterError> {
   if let Some(parent) = target.parent() {
-    try!(fs::create_dir_all(parent));
+    fs::create_dir_all(parent)?;
   }
   if target.exists() {
     if target.is_file() {
-      try!(fs::remove_file(target))
+      fs::remove_file(target)?
     } else if target.is_dir() {
-      try!(fs::remove_dir_all(target))
+      fs::remove_dir_all(target)?
     }
   }
-  let canonicalized_source = try!(fs::canonicalize(source));
-  try!(std::os::unix::fs::symlink(canonicalized_source, target));
+  let canonicalized_source = fs::canonicalize(source)?;
+  std::os::unix::fs::symlink(canonicalized_source, target)?;
   Ok(())
 }
