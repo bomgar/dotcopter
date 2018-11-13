@@ -1,8 +1,8 @@
-use yaml_rust;
-use slog::Logger;
-use yaml_rust::Yaml;
 use model::*;
-use slog::{o, info, warn };
+use slog::Logger;
+use slog::{info, o, warn};
+use yaml_rust;
+use yaml_rust::Yaml;
 
 pub fn parse_dot_files(log: &Logger, dot_files: &Yaml) -> Vec<DotFile> {
   let mut parsed_dot_files = Vec::new();
@@ -15,11 +15,9 @@ pub fn parse_dot_files(log: &Logger, dot_files: &Yaml) -> Vec<DotFile> {
           target: target.to_string(),
           dot_file_type: DotFileType::LINK,
         }),
-        (Yaml::String(target), Yaml::Hash(settings)) => parsed_dot_files.push(dot_file_from_settings(
-          &log.new(o!("target" => target.clone())),
-          &target,
-          &settings,
-        )),
+        (Yaml::String(target), Yaml::Hash(settings)) => {
+          parsed_dot_files.push(dot_file_from_settings(&log.new(o!("target" => target.clone())), &target, &settings))
+        }
         _ => {}
       }
     }
@@ -60,10 +58,10 @@ fn dot_file_type_from_string(log: &Logger, s: &str) -> DotFileType {
 
 #[cfg(test)]
 mod tests {
-  use yaml_rust::YamlLoader;
-  use yaml_rust::Yaml;
   use super::*;
   use spectral::prelude::*;
+  use yaml_rust::Yaml;
+  use yaml_rust::YamlLoader;
 
   #[test]
   fn parse_config() {

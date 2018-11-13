@@ -1,7 +1,7 @@
+use regex;
 use std::error;
 use std::fmt;
 use std::io;
-use regex;
 use std::path;
 
 #[derive(Debug)]
@@ -18,7 +18,7 @@ macro_rules! dotcopter_error_from {
         DotcopterError::$dotcopter_error(err)
       }
     }
-  }
+  };
 }
 
 impl fmt::Display for DotcopterError {

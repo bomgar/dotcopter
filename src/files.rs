@@ -1,15 +1,15 @@
-use slog::Logger;
-use yaml_rust::Yaml;
-use model::*;
-use std::path::Path;
-use std::fs;
-use std::error::Error;
-use config;
 use checksum;
+use config;
 use dirs;
-use std;
 use errors::DotcopterError;
-use slog::{error, o, info, warn, debug};
+use model::*;
+use slog::Logger;
+use slog::{debug, error, info, o, warn};
+use std;
+use std::error::Error;
+use std::fs;
+use std::path::Path;
+use yaml_rust::Yaml;
 
 pub fn process_dot_files(log: &Logger, dot_files: &Yaml, force: bool) {
   if dot_files.is_badvalue() {
@@ -41,10 +41,7 @@ fn process_dot_file(log: &Logger, dot_file: &DotFile, force: bool) {
 fn resolve_home(log: &Logger, path: &str) -> String {
   if let Some(home_dir) = dirs::home_dir() {
     if path.starts_with('~') {
-      let mut home_string = home_dir
-        .into_os_string()
-        .into_string()
-        .expect("home_dir should be a valid string");
+      let mut home_string = home_dir.into_os_string().into_string().expect("home_dir should be a valid string");
       home_string.push_str(&path[1..]);
       return home_string;
     } else {

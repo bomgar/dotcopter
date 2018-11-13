@@ -1,14 +1,14 @@
-use model::{DotFile, DotFileType};
 use dirs;
-use std::path::Path;
-use std::path::PathBuf;
+use errors::DotcopterError;
+use model::{DotFile, DotFileType};
+use regex::Regex;
 use slog::Logger;
-use std::fs;
+use slog::{debug, error, info, o, warn};
 use std::env;
 use std::error::Error;
-use regex::Regex;
-use errors::DotcopterError;
-use slog::{error, debug, o, warn, info};
+use std::fs;
+use std::path::Path;
+use std::path::PathBuf;
 
 pub fn scan_dir(log: &Logger, dir: &str) -> Vec<DotFile> {
   let path = Path::new(dir);
@@ -67,10 +67,7 @@ fn replace_home_with_tilde(log: &Logger, path: &str) -> Result<String, Dotcopter
 }
 
 fn replace_path_with_tilde(path: &str, path_to_replace: PathBuf) -> Result<String, DotcopterError> {
-  let replace_string = path_to_replace
-    .into_os_string()
-    .into_string()
-    .expect("path should be a valid string");
+  let replace_string = path_to_replace.into_os_string().into_string().expect("path should be a valid string");
   let mut pattern: String = "^".to_string();
   pattern.push_str(&replace_string);
   let regex = Regex::new(&pattern)?;

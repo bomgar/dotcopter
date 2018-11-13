@@ -1,13 +1,13 @@
 use clap::{App, AppSettings, Arg, SubCommand};
+use errors::DotcopterError;
 use slog::{Drain, Level, LevelFilter, Logger};
-use yaml_rust::YamlLoader;
-use std::io::prelude::*;
-use std::fs::File;
-use yaml_rust::{Yaml, YamlEmitter};
 use std::error::Error;
+use std::fs::File;
+use std::io::prelude::*;
 use std::path::Path;
 use std::process::exit;
-use errors::DotcopterError;
+use yaml_rust::YamlLoader;
+use yaml_rust::{Yaml, YamlEmitter};
 
 extern crate clap;
 extern crate crypto;
@@ -23,15 +23,15 @@ extern crate spectral;
 extern crate dirs;
 
 use clap::crate_version;
-use slog::{error, o, info, warn};
+use slog::{error, info, o, warn};
 
-mod model;
-mod config;
 mod checksum;
-mod files;
-mod mutate;
-mod import;
+mod config;
 mod errors;
+mod files;
+mod import;
+mod model;
+mod mutate;
 
 fn main() {
   let return_code = _main();
@@ -43,14 +43,8 @@ fn _main() -> i32 {
   let force: bool = matches.is_present("force");
 
   let decorator = slog_term::TermDecorator::new().build();
-  let drain = slog_term::FullFormat::new(decorator)
-    .use_original_order()
-    .build()
-    .fuse();
-  let drain = slog_async::Async::new(drain)
-    .chan_size(10_000)
-    .build()
-    .fuse();
+  let drain = slog_term::FullFormat::new(decorator).use_original_order().build().fuse();
+  let drain = slog_async::Async::new(drain).chan_size(10_000).build().fuse();
   let log = if verbose {
     slog::Logger::root(drain, o!())
   } else {
@@ -98,13 +92,11 @@ fn _main() -> i32 {
     let new_config = mutate::add_dotfiles_to_config(
       &log,
       yaml_config,
-      &[
-        model::DotFile {
-          target: link_name.to_string(),
-          source: link_target.to_string(),
-          dot_file_type: model::DotFileType::LINK,
-        },
-      ],
+      &[model::DotFile {
+        target: link_name.to_string(),
+        source: link_target.to_string(),
+        dot_file_type: model::DotFileType::LINK,
+      }],
     );
     return write_new_yaml(&log, &new_config, config_file);
   } else if let Some(cp_matches) = maybe_cp_matches {
@@ -116,13 +108,11 @@ fn _main() -> i32 {
     let new_config = mutate::add_dotfiles_to_config(
       &log,
       yaml_config,
-      &[
-        model::DotFile {
-          target: target.to_string(),
-          source: source.to_string(),
-          dot_file_type: model::DotFileType::COPY,
-        },
-      ],
+      &[model::DotFile {
+        target: target.to_string(),
+        source: source.to_string(),
+        dot_file_type: model::DotFileType::COPY,
+      }],
     );
     return write_new_yaml(&log, &new_config, config_file);
   } else if let Some(import_matches) = maybe_import_matches {
@@ -188,12 +178,7 @@ fn create_app<'a>() -> App<'a, 'a> {
     .author("Patrick Haun <bomgar85@googlemail.com>")
     .about("manages dotfiles installation")
     .setting(AppSettings::SubcommandRequired)
-    .arg(
-      Arg::with_name("force")
-        .short("f")
-        .long("force")
-        .takes_value(false),
-    )
+    .arg(Arg::with_name("force").short("f").long("force").takes_value(false))
     .arg(
       Arg::with_name("verbose")
         .long("verbose")
@@ -201,22 +186,19 @@ fn create_app<'a>() -> App<'a, 'a> {
         .help("debug output")
         .required(false)
         .takes_value(false),
-    )
-    .arg(Arg::with_name("config_file").required(true))
+    ).arg(Arg::with_name("config_file").required(true))
     .subcommand(SubCommand::with_name("apply").about("applies a dotfile configuration"))
     .subcommand(
       SubCommand::with_name("ln")
         .about("adds new link to configuration")
         .arg(Arg::with_name("link_target").required(true))
         .arg(Arg::with_name("link_name").required(true)),
-    )
-    .subcommand(
+    ).subcommand(
       SubCommand::with_name("cp")
         .about("adds new copy to configuration")
         .arg(Arg::with_name("source").required(true))
         .arg(Arg::with_name("target").required(true)),
-    )
-    .subcommand(
+    ).subcommand(
       SubCommand::with_name("import")
         .about("imports dotfiles from a folder into the configuration")
         .arg(Arg::with_name("dir").required(true)),
