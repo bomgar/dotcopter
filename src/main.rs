@@ -1,5 +1,5 @@
-use clap::{App, AppSettings, Arg, SubCommand};
 use crate::errors::DotcopterError;
+use clap::{App, AppSettings, Arg, SubCommand};
 use slog::{Drain, Level, LevelFilter, Logger};
 use std::error::Error;
 use std::fs::File;
@@ -8,7 +8,6 @@ use std::path::Path;
 use std::process::exit;
 use yaml_rust::YamlLoader;
 use yaml_rust::{Yaml, YamlEmitter};
-
 
 #[cfg(test)]
 extern crate spectral;
@@ -177,19 +176,22 @@ fn create_app<'a>() -> App<'a, 'a> {
         .help("debug output")
         .required(false)
         .takes_value(false),
-    ).arg(Arg::with_name("config_file").required(true))
+    )
+    .arg(Arg::with_name("config_file").required(true))
     .subcommand(SubCommand::with_name("apply").about("applies a dotfile configuration"))
     .subcommand(
       SubCommand::with_name("ln")
         .about("adds new link to configuration")
         .arg(Arg::with_name("link_target").required(true))
         .arg(Arg::with_name("link_name").required(true)),
-    ).subcommand(
+    )
+    .subcommand(
       SubCommand::with_name("cp")
         .about("adds new copy to configuration")
         .arg(Arg::with_name("source").required(true))
         .arg(Arg::with_name("target").required(true)),
-    ).subcommand(
+    )
+    .subcommand(
       SubCommand::with_name("import")
         .about("imports dotfiles from a folder into the configuration")
         .arg(Arg::with_name("dir").required(true)),

@@ -1,8 +1,8 @@
 use crate::checksum;
 use crate::config;
-use dirs;
 use crate::errors::DotcopterError;
 use crate::model::*;
+use dirs;
 use slog::Logger;
 use slog::{debug, error, info, o, warn};
 use std;
