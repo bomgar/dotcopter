@@ -1,4 +1,4 @@
-use model;
+use crate::model;
 use slog::warn;
 use slog::Logger;
 use yaml_rust::yaml;
@@ -33,7 +33,7 @@ fn add_dotfiles_to_files(files: &Yaml, dotfiles: &[model::DotFile]) -> Yaml {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use model::{DotFile, DotFileType};
+  use crate::model::{DotFile, DotFileType};
   use slog::o;
   use spectral::prelude::*;
   use yaml_rust::YamlLoader;

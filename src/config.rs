@@ -1,4 +1,4 @@
-use model::*;
+use crate::model::*;
 use slog::Logger;
 use slog::{info, o, warn};
 use yaml_rust;

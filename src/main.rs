@@ -1,5 +1,5 @@
 use clap::{App, AppSettings, Arg, SubCommand};
-use errors::DotcopterError;
+use crate::errors::DotcopterError;
 use slog::{Drain, Level, LevelFilter, Logger};
 use std::error::Error;
 use std::fs::File;
@@ -9,18 +9,9 @@ use std::process::exit;
 use yaml_rust::YamlLoader;
 use yaml_rust::{Yaml, YamlEmitter};
 
-extern crate clap;
-extern crate crypto;
-extern crate regex;
-extern crate slog;
-extern crate slog_async;
-extern crate slog_term;
-extern crate yaml_rust;
 
 #[cfg(test)]
 extern crate spectral;
-
-extern crate dirs;
 
 use clap::crate_version;
 use slog::{error, info, o, warn};
