@@ -85,7 +85,7 @@ fn copy_dot_file(source: &Path, target: &Path) -> Result<(), DotcopterError> {
   Ok(())
 }
 
-#[cfg_attr(feature = "cargo-clippy", allow(if_same_then_else))]
+#[cfg_attr(feature = "cargo-clippy", allow(clippy::if_same_then_else))]
 fn has_same_content(log: &Logger, source: &Path, target: &Path) -> Result<bool, DotcopterError> {
   if !target.exists() {
     Ok(false)
