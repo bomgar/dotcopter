@@ -167,7 +167,7 @@ dependencies = [
 
 [[package]]
 name = "dotcopter"
-version = "0.4.3-alpha.0"
+version = "0.4.3"
 dependencies = [
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "dirs 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
