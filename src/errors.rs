@@ -40,7 +40,7 @@ impl error::Error for DotcopterError {
     }
   }
 
-  fn cause(&self) -> Option<&error::Error> {
+  fn cause(&self) -> Option<&dyn error::Error> {
     match *self {
       DotcopterError::IO(ref err) => Some(err),
       DotcopterError::Regex(ref err) => Some(err),

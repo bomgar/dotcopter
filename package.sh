@@ -6,7 +6,7 @@ if [ "$TRAVIS" = true ]; then
     chmod -R 777 .
 fi
 
-docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:1.31.0 cargo build --release
+docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder:1.37.0 cargo build --release
 name=dotcopter
 target_dir="target/x86_64-unknown-linux-musl/release"
 
