@@ -43,13 +43,13 @@ fn resolve_home(log: &Logger, path: &str) -> String {
     if path.starts_with('~') {
       let mut home_string = home_dir.into_os_string().into_string().expect("home_dir should be a valid string");
       home_string.push_str(&path[1..]);
-      return home_string;
+      home_string
     } else {
-      return path.to_string();
+      path.to_string()
     }
   } else {
     warn!(log, "Home dir not set");
-    return path.to_string();
+    path.to_string()
   }
 }
 
