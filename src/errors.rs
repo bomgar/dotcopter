@@ -33,6 +33,7 @@ impl fmt::Display for DotcopterError {
 
 impl error::Error for DotcopterError {
   fn description(&self) -> &str {
+    #[allow(deprecated)]
     match *self {
       DotcopterError::IO(ref err) => err.description(),
       DotcopterError::Regex(ref err) => err.description(),

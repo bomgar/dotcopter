@@ -5,7 +5,6 @@ use regex::Regex;
 use slog::Logger;
 use slog::{debug, error, info, o, warn};
 use std::env;
-use std::error::Error;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
@@ -16,7 +15,7 @@ pub fn scan_dir(log: &Logger, dir: &str) -> Vec<DotFile> {
     match get_dot_files(log, path) {
       Ok(links) => links,
       Err(e) => {
-        error!(log, "Failed to get symlinks"; "error" => e.description());
+        error!(log, "Failed to get symlinks"; "error" => e.to_string());
         Vec::new()
       }
     }

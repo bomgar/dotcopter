@@ -6,7 +6,6 @@ use dirs;
 use slog::Logger;
 use slog::{debug, error, info, o, warn};
 use std;
-use std::error::Error;
 use std::fs;
 use std::path::Path;
 use yaml_rust::Yaml;
@@ -63,10 +62,10 @@ fn process_copy(log: &Logger, source_path: &Path, target_path: &Path, force: boo
       }
       match copy_dot_file(source_path, target_path) {
         Ok(_) => info!(log, "Copied file successfully"),
-        Err(e) => error!(log, "Failed to copy file"; "error" => e.description()),
+        Err(e) => error!(log, "Failed to copy file"; "error" => e.to_string()),
       }
     }
-    Err(e) => error!(log, "Failed to copy dotfile"; "error" => e.description()),
+    Err(e) => error!(log, "Failed to copy dotfile"; "error" => e.to_string()),
   }
 }
 
@@ -108,12 +107,12 @@ fn process_link(log: &Logger, source_path: &Path, target_path: &Path, force: boo
       } else {
         let result = link_dot_file(source_path, target_path);
         match result {
-          Err(e) => error!(log, "Failed to create link"; "error" => e.description()),
+          Err(e) => error!(log, "Failed to create link"; "error" => e.to_string()),
           Ok(_) => info!(log, "Link created successfully"),
         }
       }
     }
-    Err(e) => error!(log, "Failed to check link existence"; "error" => e.description()),
+    Err(e) => error!(log, "Failed to check link existence"; "error" => e.to_string()),
   }
 }
 

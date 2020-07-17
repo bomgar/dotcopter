@@ -1,7 +1,6 @@
 use crate::errors::DotcopterError;
 use clap::{App, AppSettings, Arg, SubCommand};
 use slog::{Drain, Level, LevelFilter, Logger};
-use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -47,7 +46,7 @@ fn _main() -> i32 {
   let config = match load_config_file(&log, config_file) {
     Ok(content) => content,
     Err(e) => {
-      error!(log, "Failed to load config file."; "error" => e.description());
+      error!(log, "Failed to load config file."; "error" => e.to_string());
       return 1;
     }
   };
@@ -55,7 +54,7 @@ fn _main() -> i32 {
   let mut yaml_documents = match YamlLoader::load_from_str(&config) {
     Ok(yaml) => yaml,
     Err(e) => {
-      error!(log, "Failed to parse config file."; "error" => e.description());
+      error!(log, "Failed to parse config file."; "error" => e.to_string());
       return 2;
     }
   };
@@ -135,7 +134,7 @@ fn write_new_yaml(log: &Logger, document: &Yaml, config_file: &str) -> i32 {
   match write_config_file(config_file, &out_str) {
     Ok(_) => info!(log, "Successfully written configuration"),
     Err(e) => {
-      error!(log, "Failed to write config file."; "error" => e.description());
+      error!(log, "Failed to write config file."; "error" => e.to_string());
       return 4;
     }
   };
