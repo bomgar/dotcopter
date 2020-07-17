@@ -1,6 +1,5 @@
 use crate::errors::DotcopterError;
 use crate::model::{DotFile, DotFileType};
-use dirs;
 use regex::Regex;
 use slog::Logger;
 use slog::{debug, error, info, o, warn};

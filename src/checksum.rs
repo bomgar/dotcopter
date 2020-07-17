@@ -1,6 +1,5 @@
 use crypto::digest::Digest;
 use crypto::sha2::Sha256;
-use std;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;

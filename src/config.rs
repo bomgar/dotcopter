@@ -1,7 +1,6 @@
 use crate::model::*;
 use slog::Logger;
 use slog::{info, o, warn};
-use yaml_rust;
 use yaml_rust::Yaml;
 
 pub fn parse_dot_files(log: &Logger, dot_files: &Yaml) -> Vec<DotFile> {

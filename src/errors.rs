@@ -1,4 +1,3 @@
-use regex;
 use std::error;
 use std::fmt;
 use std::io;
