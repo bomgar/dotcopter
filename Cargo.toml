@@ -10,7 +10,7 @@ license = "Apache-2.0"
 edition = "2018"
 
 [dependencies]
-dirs = "2"
+dirs = "3"
 clap = "2.29"
 slog-term = "2"
 slog-async = "2"
