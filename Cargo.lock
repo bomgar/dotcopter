@@ -163,7 +163,7 @@ dependencies = [
 
 [[package]]
 name = "dotcopter"
-version = "0.4.6-alpha.0"
+version = "0.5.0"
 dependencies = [
  "clap",
  "dirs 3.0.1",
