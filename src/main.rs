@@ -130,7 +130,7 @@ fn write_new_yaml(log: &Logger, document: &Yaml, config_file: &str) -> i32 {
       }
     }
   }
-  out_str.push_str("\n");
+  out_str.push('\n');
   match write_config_file(config_file, &out_str) {
     Ok(_) => info!(log, "Successfully written configuration"),
     Err(e) => {

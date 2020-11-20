@@ -37,9 +37,9 @@ fn process_dot_file(log: &Logger, dot_file: &DotFile, force: bool) {
 
 fn resolve_home(log: &Logger, path: &str) -> String {
   if let Some(home_dir) = dirs::home_dir() {
-    if path.starts_with('~') {
+    if let Some(stripped_path) = path.strip_prefix('~') {
       let mut home_string = home_dir.into_os_string().into_string().expect("home_dir should be a valid string");
-      home_string.push_str(&path[1..]);
+      home_string.push_str(&stripped_path);
       home_string
     } else {
       path.to_string()
