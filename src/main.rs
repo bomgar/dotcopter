@@ -1,5 +1,5 @@
 use crate::errors::DotcopterError;
-use clap::{App, AppSettings, Arg, SubCommand};
+use clap::{App, AppSettings, Arg};
 use slog::{Drain, Level, LevelFilter, Logger};
 use std::fs::File;
 use std::io::prelude::*;
@@ -160,39 +160,38 @@ fn load_config_file(log: &Logger, file: &str) -> Result<String, DotcopterError> 
   }
 }
 
-fn create_app<'a>() -> App<'a, 'a> {
+fn create_app<'a>() -> App<'a> {
   App::new("dotcopter")
     .version(crate_version!())
-    .setting(AppSettings::ColoredHelp)
     .author("Patrick Haun <bomgar85@googlemail.com>")
     .about("manages dotfiles installation")
     .setting(AppSettings::SubcommandRequired)
-    .arg(Arg::with_name("force").short("f").long("force").takes_value(false))
+    .arg(Arg::new("force").short('f').long("force").takes_value(false))
     .arg(
-      Arg::with_name("verbose")
+      Arg::new("verbose")
         .long("verbose")
-        .short("v")
+        .short('v')
         .help("debug output")
         .required(false)
         .takes_value(false),
     )
-    .arg(Arg::with_name("config_file").required(true))
-    .subcommand(SubCommand::with_name("apply").about("applies a dotfile configuration"))
+    .arg(Arg::new("config_file").required(true))
+    .subcommand(App::new("apply").about("applies a dotfile configuration"))
     .subcommand(
-      SubCommand::with_name("ln")
+      App::new("ln")
         .about("adds new link to configuration")
-        .arg(Arg::with_name("link_target").required(true))
-        .arg(Arg::with_name("link_name").required(true)),
+        .arg(Arg::new("link_target").required(true))
+        .arg(Arg::new("link_name").required(true)),
     )
     .subcommand(
-      SubCommand::with_name("cp")
+      App::new("cp")
         .about("adds new copy to configuration")
-        .arg(Arg::with_name("source").required(true))
-        .arg(Arg::with_name("target").required(true)),
+        .arg(Arg::new("source").required(true))
+        .arg(Arg::new("target").required(true)),
     )
     .subcommand(
-      SubCommand::with_name("import")
+      App::new("import")
         .about("imports dotfiles from a folder into the configuration")
-        .arg(Arg::with_name("dir").required(true)),
+        .arg(Arg::new("dir").required(true)),
     )
 }
