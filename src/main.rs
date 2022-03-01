@@ -1,5 +1,5 @@
 use crate::errors::DotcopterError;
-use clap::{App, AppSettings, Arg};
+use clap::{Arg, Command};
 use slog::{Drain, Level, LevelFilter, Logger};
 use std::fs::File;
 use std::io::prelude::*;
@@ -160,12 +160,12 @@ fn load_config_file(log: &Logger, file: &str) -> Result<String, DotcopterError> 
   }
 }
 
-fn create_app<'a>() -> App<'a> {
-  App::new("dotcopter")
+fn create_app<'a>() -> Command<'a> {
+  Command::new("dotcopter")
     .version(crate_version!())
     .author("Patrick Haun <bomgar85@googlemail.com>")
     .about("manages dotfiles installation")
-    .setting(AppSettings::SubcommandRequired)
+    .subcommand_required(true)
     .arg(Arg::new("force").short('f').long("force").takes_value(false))
     .arg(
       Arg::new("verbose")
@@ -176,21 +176,21 @@ fn create_app<'a>() -> App<'a> {
         .takes_value(false),
     )
     .arg(Arg::new("config_file").required(true))
-    .subcommand(App::new("apply").about("applies a dotfile configuration"))
+    .subcommand(Command::new("apply").about("applies a dotfile configuration"))
     .subcommand(
-      App::new("ln")
+      Command::new("ln")
         .about("adds new link to configuration")
         .arg(Arg::new("link_target").required(true))
         .arg(Arg::new("link_name").required(true)),
     )
     .subcommand(
-      App::new("cp")
+      Command::new("cp")
         .about("adds new copy to configuration")
         .arg(Arg::new("source").required(true))
         .arg(Arg::new("target").required(true)),
     )
     .subcommand(
-      App::new("import")
+      Command::new("import")
         .about("imports dotfiles from a folder into the configuration")
         .arg(Arg::new("dir").required(true)),
     )
